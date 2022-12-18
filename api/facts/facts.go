@@ -1,7 +1,9 @@
-package handler
+package facts
+
+import "go.mongodb.org/mongo-driver/mongo"
 
 type Database struct {
-	Db string
+	Db mongo.Database
 }
 
 type Fact struct {
@@ -22,9 +24,9 @@ func NewFactHandler(db Database) (FactHandler, error) {
 }
 
 func (db *Database) GetFactById(id string) (Fact, error) {
-	return Fact{Id: id, Text: "All animals are awesome!", Category: "general", Source: "https://animalfacts.app/sources", Image: ""}, nil
+	return Fact{Id: id, Text: "All animals are awesome!", Category: "general", Source: "https://github.com/cafo13/animal-facts/apisources", Image: ""}, nil
 }
 
 func (db *Database) GetRandomFact() (Fact, error) {
-	return Fact{Id: "123", Text: "All animals are awesome!", Category: "random", Source: "https://animalfacts.app/sources", Image: ""}, nil
+	return Fact{Id: "123", Text: "All animals are awesome!", Category: "random", Source: "https://github.com/cafo13/animal-facts/apisources", Image: ""}, nil
 }
