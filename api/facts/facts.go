@@ -1,32 +1,44 @@
 package facts
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"math/rand"
 
-type Database struct {
-	Db mongo.Database
-}
+	"github.com/cafo13/animal-facts/api/database"
+	"github.com/cafo13/animal-facts/api/types"
+)
 
-type Fact struct {
-	Id       string
-	Text     string
-	Category string
-	Source   string
-	Image    string
+type DataHandler struct {
+	Handler database.DatabaseHandler
 }
 
 type FactHandler interface {
-	GetFactById(id string) (Fact, error)
-	GetRandomFact() (Fact, error)
+	GetFactById(id string) (*types.Fact, error)
+	GetRandomFact() (*types.Fact, error)
 }
 
-func NewFactHandler(db Database) (FactHandler, error) {
-	return &db, nil
+func NewFactHandler(databaseHandler database.DatabaseHandler) (FactHandler, error) {
+	return DataHandler{Handler: databaseHandler}, nil
 }
 
-func (db *Database) GetFactById(id string) (Fact, error) {
-	return Fact{Id: id, Text: "All animals are awesome!", Category: "general", Source: "https://github.com/cafo13/animal-facts/apisources", Image: ""}, nil
+func (dh DataHandler) GetFactById(id string) (*types.Fact, error) {
+	item, err := dh.Handler.GetItem(id)
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
 }
 
-func (db *Database) GetRandomFact() (Fact, error) {
-	return Fact{Id: "123", Text: "All animals are awesome!", Category: "random", Source: "https://github.com/cafo13/animal-facts/apisources", Image: ""}, nil
+func (dh DataHandler) GetRandomFact() (*types.Fact, error) {
+	itemCount, err := dh.Handler.GetItemCount()
+	if err != nil {
+		return nil, err
+	}
+
+	randomId := rand.Intn(itemCount-1) + 1
+
+	item, err := dh.Handler.GetItem(string(rune(randomId)))
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
 }

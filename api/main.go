@@ -7,10 +7,10 @@ import (
 
 	"github.com/cafo13/animal-facts/api/database"
 	"github.com/cafo13/animal-facts/api/facts"
+	"github.com/cafo13/animal-facts/api/types"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func getEnvVar(envVar string, defaultValue string) string {
@@ -25,16 +25,16 @@ func setupLogger() {
 	log.SetLevel(log.InfoLevel)
 }
 
-func setupDatabaseConnection(connectionString string, mongoDatabaseName string) (*mongo.Database, error) {
-	database, err := database.GetDatabase(connectionString, mongoDatabaseName)
+func setupDatabaseHandler(connectionString string, mongoDatabaseName string) (*database.DatabaseHandler, error) {
+	databaseHandler, err := database.NewDatabaseHandler(connectionString, mongoDatabaseName)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Failed to get database by connection %s", connectionString), err)
 		return nil, err
 	}
-	return database, nil
+	return &databaseHandler, nil
 }
 
-func setupRouter(database mongo.Database) *gin.Engine {
+func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
 	router := gin.Default()
 
 	router.GET("/health", func(c *gin.Context) {
@@ -42,9 +42,9 @@ func setupRouter(database mongo.Database) *gin.Engine {
 	})
 
 	router.GET("/fact", func(c *gin.Context) {
-		var fact facts.Fact
+		var fact *types.Fact
 
-		factHandler, err := facts.NewFactHandler(facts.Database{Db: database})
+		factHandler, err := facts.NewFactHandler(*databaseHandler)
 		if err != nil {
 			log.Error("Error on initializing fact handler", err)
 		}
@@ -59,10 +59,10 @@ func setupRouter(database mongo.Database) *gin.Engine {
 	})
 
 	router.GET("/fact/:id", func(c *gin.Context) {
-		var fact facts.Fact
+		var fact *types.Fact
 		id := c.Params.ByName("id")
 
-		factHandler, err := facts.NewFactHandler(facts.Database{Db: database})
+		factHandler, err := facts.NewFactHandler(*databaseHandler)
 		if err != nil {
 			log.Error("Error on initializing fact handler", err)
 		}
@@ -86,11 +86,11 @@ func main() {
 	mongoDatabaseName := getEnvVar("MONGODB_DBNAME", "animalfacts")
 	apiPort := getEnvVar("API_PORT", "8080")
 
-	database, err := setupDatabaseConnection(mongoDatabaseConnectionString, mongoDatabaseName)
+	databaseHandler, err := setupDatabaseHandler(mongoDatabaseConnectionString, mongoDatabaseName)
 	if err != nil {
-		log.Fatal("Failed to setup database connection", err)
+		log.Fatal("Failed to setup database handler", err)
 	}
 
-	router := setupRouter(*database)
+	router := setupRouter(databaseHandler)
 	router.Run(":" + apiPort)
 }
