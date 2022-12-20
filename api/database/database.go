@@ -2,9 +2,11 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -12,16 +14,21 @@ import (
 )
 
 type Database struct {
-	MongoDB *mongo.Database
+	MongoDatabaseUri  string
+	MongoDatabaseName string
 }
 
 type DatabaseHandler interface {
-	GetItem(id string) (types.Fact, error)
-	GetItemCount() (int, error)
+	GetItem(id string) (*types.Fact, error)
+	GetItemCount() (int64, error)
 }
 
-func NewDatabaseHandler(mongoDatabaseUri string, mongoDatabaseName string) (DatabaseHandler, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoDatabaseUri))
+func NewDatabaseHandler(mongoDatabaseUri string, mongoDatabaseName string) DatabaseHandler {
+	return Database{MongoDatabaseUri: mongoDatabaseUri, MongoDatabaseName: mongoDatabaseName}
+}
+
+func (db Database) GetItem(id string) (*types.Fact, error) {
+	client, err := mongo.NewClient(options.Client().ApplyURI(db.MongoDatabaseUri))
 	if err != nil {
 		log.Fatal("Failed to initialize mongo db client", err)
 		return nil, err
@@ -32,18 +39,43 @@ func NewDatabaseHandler(mongoDatabaseUri string, mongoDatabaseName string) (Data
 		log.Fatal("Failed to connect to mongo db", err)
 		return nil, err
 	}
-
-	database := client.Database(mongoDatabaseName)
-
 	defer client.Disconnect(ctx)
 
-	return Database{MongoDB: database}, nil
+	database := client.Database(db.MongoDatabaseName)
+	collection := database.Collection("animalfacts")
+
+	result := collection.FindOne(context.Background(), bson.M{"Id": id})
+	fact := &types.Fact{}
+	result.Decode(fact)
+
+	if fact.Id == "" {
+		return nil, fmt.Errorf("fact with id %s not found", id)
+	}
+
+	return fact, nil
 }
 
-func (db Database) GetItem(id string) (types.Fact, error) {
-	return types.Fact{Id: id, Text: "All animals are awesome!", Category: "general", Source: "https://github.com/cafo13/animal-facts/apisources", Image: ""}, nil
-}
+func (db Database) GetItemCount() (int64, error) {
+	client, err := mongo.NewClient(options.Client().ApplyURI(db.MongoDatabaseUri))
+	if err != nil {
+		log.Fatal("Failed to initialize mongo db client", err)
+		return -1, err
+	}
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal("Failed to connect to mongo db", err)
+		return -1, err
+	}
+	defer client.Disconnect(ctx)
 
-func (db Database) GetItemCount() (int, error) {
-	return 111, nil
+	database := client.Database(db.MongoDatabaseName)
+	collection := database.Collection("animalfacts")
+
+	count, err := collection.EstimatedDocumentCount(ctx, nil)
+	if err != nil {
+		return -1, err
+	}
+
+	return count, nil
 }

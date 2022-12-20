@@ -25,13 +25,9 @@ func setupLogger() {
 	log.SetLevel(log.InfoLevel)
 }
 
-func setupDatabaseHandler(connectionString string, mongoDatabaseName string) (*database.DatabaseHandler, error) {
-	databaseHandler, err := database.NewDatabaseHandler(connectionString, mongoDatabaseName)
-	if err != nil {
-		log.Fatal(fmt.Sprintf("Failed to get database by connection %s", connectionString), err)
-		return nil, err
-	}
-	return &databaseHandler, nil
+func setupDatabaseHandler(connectionString string, mongoDatabaseName string) *database.DatabaseHandler {
+	databaseHandler := database.NewDatabaseHandler(connectionString, mongoDatabaseName)
+	return &databaseHandler
 }
 
 func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
@@ -52,10 +48,10 @@ func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
 		fact, err = factHandler.GetRandomFact()
 		if err != nil {
 			fmt.Println("Error on getting random fact", err)
-			c.JSON(http.StatusNotFound, gin.H{"fact": "random fact not found", "error": err})
+			c.JSON(http.StatusInternalServerError, gin.H{"fact": types.Fact{}, "error": err.Error()})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"fact": fact})
 		}
-
-		c.JSON(http.StatusOK, gin.H{"fact": fact})
 	})
 
 	router.GET("/fact/:id", func(c *gin.Context) {
@@ -69,11 +65,11 @@ func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
 
 		fact, err = factHandler.GetFactById(id)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("Error on getting fact handler by id %s", id), err)
-			c.JSON(http.StatusNotFound, gin.H{"fact": fmt.Sprintf("fact with id %s not found", id), "error": err})
+			fmt.Println(fmt.Sprintf("Error on getting fact by id %s", id), err)
+			c.JSON(http.StatusNotFound, gin.H{"fact": types.Fact{}, "error": err.Error()})
+		} else {
+			c.JSON(http.StatusOK, gin.H{"fact": fact})
 		}
-
-		c.JSON(http.StatusOK, gin.H{"fact": fact})
 	})
 
 	return router
@@ -86,11 +82,6 @@ func main() {
 	mongoDatabaseName := getEnvVar("MONGODB_DBNAME", "animalfacts")
 	apiPort := getEnvVar("API_PORT", "8080")
 
-	databaseHandler, err := setupDatabaseHandler(mongoDatabaseConnectionString, mongoDatabaseName)
-	if err != nil {
-		log.Fatal("Failed to setup database handler", err)
-	}
-
-	router := setupRouter(databaseHandler)
+	router := setupRouter(setupDatabaseHandler(mongoDatabaseConnectionString, mongoDatabaseName))
 	router.Run(":" + apiPort)
 }
