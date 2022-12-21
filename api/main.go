@@ -34,10 +34,15 @@ func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
 	router := gin.Default()
 
 	router.GET("/health", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
 		c.String(http.StatusOK, "healthy\n")
 	})
 
 	router.GET("/fact", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+
 		var fact *types.Fact
 
 		factHandler, err := facts.NewFactHandler(*databaseHandler)
@@ -55,6 +60,9 @@ func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
 	})
 
 	router.GET("/fact/:id", func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET")
+
 		var fact *types.Fact
 		id := c.Params.ByName("id")
 

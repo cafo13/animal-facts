@@ -3,7 +3,7 @@ version: '3.1'
 services:
 
   animalfacts:
-    image: animalfacts:testing
+    image: animalfactsapi:testing
     container_name: animalfacts
     environment:
       MONGODB_CONNSTRING: "mongodb://animalfacts:animalfacts@mongodb:27017"
