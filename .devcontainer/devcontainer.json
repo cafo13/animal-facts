@@ -3,7 +3,10 @@
 	"dockerComposeFile": "docker-compose.yml",
     "service": "animalfacts-devcontainer",
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-	"forwardPorts": [8080, 3000],
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/zsh",
+		"editor.tabSize": 4
+	},
 	"extensions": [
 		"JanBn.git-last-commit-message",
 		"golang.go",

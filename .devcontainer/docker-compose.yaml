@@ -6,12 +6,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: animalfacts-frontend
+    container_name: animalfacts-devcontainer
     volumes:
       - ../..:/workspaces:cached
-    ports:
-      - '8080:8080' # API
-      - '3000:3000' # Frontend
     network_mode: service:animalfacts-mongodb
     command: sleep infinity
 
