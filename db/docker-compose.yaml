@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+
+  animalfacts-mongodb:
+    image: mongo:6.0.3
+    container_name: animalfacts-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: animalfacts
+      MONGO_INITDB_ROOT_PASSWORD: animalfacts
+    ports:
+      - '27017:27017'
+    volumes:
+      - /etc/animalfacts/db:/data/db
