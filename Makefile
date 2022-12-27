@@ -1,13 +1,13 @@
 VERSION:="testing"
 
-dev-serve-frontend:
+serve-frontend:
 	echo "TODO: add script here"
 
-dev-serve-api:
+serve-api:
 	echo "TODO: add script here"
 
-ci-build-frontend:
+build-frontend:
 	docker build ./frontend -t animalfacts-frontend:${VERSION} -f ./frontend/Dockerfile
 
-ci-build-api:
+build-api:
 	docker build ./api -t animalfacts-api:${VERSION} -f ./api/Dockerfile
