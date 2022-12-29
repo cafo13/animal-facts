@@ -53,9 +53,9 @@ func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
 		fact, err = factHandler.GetRandomFact()
 		if err != nil {
 			fmt.Println("Error on getting random fact", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"fact": types.Fact{}, "error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"Fact": types.Fact{}, "error": err.Error()})
 		} else {
-			c.JSON(http.StatusOK, gin.H{"fact": fact})
+			c.JSON(http.StatusOK, gin.H{"Fact": fact})
 		}
 	})
 
@@ -74,9 +74,9 @@ func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
 		fact, err = factHandler.GetFactById(id)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("Error on getting fact by id %s", id), err)
-			c.JSON(http.StatusNotFound, gin.H{"fact": types.Fact{}, "error": err.Error()})
+			c.JSON(http.StatusNotFound, gin.H{"Fact": types.Fact{}, "error": err.Error()})
 		} else {
-			c.JSON(http.StatusOK, gin.H{"fact": fact})
+			c.JSON(http.StatusOK, gin.H{"Fact": fact})
 		}
 	})
 

@@ -5,5 +5,4 @@ type Fact struct {
 	Text     string
 	Category string
 	Source   string
-	Image    string
 }
