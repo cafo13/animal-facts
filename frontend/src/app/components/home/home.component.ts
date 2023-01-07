@@ -15,7 +15,7 @@ import {
 export class HomeComponent implements OnInit, OnDestroy {
     factRetentionSeconds = 30
     progressSub: Subscription | undefined = undefined
-    progressValue: number = 0
+    progressValue: number = this.factRetentionSeconds
     currentFact: Fact = { Id: '', Text: '', Category: '', Source: '' }
 
     constructor(private animalfactsService: AnimalfactsService) {}
@@ -36,14 +36,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
     startFactTimer() {
         this.loadFact()
-        this.progressSub = interval(100).subscribe(() => {
-            this.progressValue += 10 / this.factRetentionSeconds
-        })
+        this.progressSub = interval(1000).subscribe(
+            () => (this.progressValue -= 1)
+        )
     }
 
     resetFactTimer() {
         this.progressSub?.unsubscribe()
-        this.progressValue = 0
+        this.progressValue = this.factRetentionSeconds
         this.startFactTimer()
     }
 }

@@ -4,8 +4,8 @@
     [category]="this.currentFact.Category"
     [source]="this.currentFact.Source"
 ></app-fact>
-<app-progress-bar
-    class="progress-bar"
+<app-fact-controls
+    class="fact-controls"
     [value]="progressValue"
-    (progressBarComplete)="this.resetFactTimer()"
-></app-progress-bar>
+    (timerEnd)="this.resetFactTimer()"
+></app-fact-controls>
