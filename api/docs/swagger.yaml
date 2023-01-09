@@ -1,0 +1,67 @@
+basePath: /api/v1
+definitions:
+  types.Fact:
+    properties:
+      category:
+        type: string
+      id:
+        type: string
+      source:
+        type: string
+      text:
+        type: string
+    type: object
+host: https://animalfacts.app
+info:
+  contact:
+    email: support@animalfacts.app
+    name: Animal Facts API
+    url: https://animalfacts.app/support
+  description: Get awesome facts about animals.
+  license:
+    name: MIT
+    url: https://github.com/cafo13/animal-facts/blob/main/LICENSE
+  termsOfService: https://animalfact.app/terms
+  title: Animal Facts API
+  version: "1.0"
+paths:
+  /fact:
+    get:
+      description: Getting a random animal fact
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Fact'
+      summary: Get random animal fact
+      tags:
+      - facts
+  /fact/:id:
+    get:
+      description: Getting an animal fact by ID
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Fact'
+      summary: Get animal fact by ID
+      tags:
+      - facts
+  /healthy:
+    get:
+      description: Checking the health of the API
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Get health status
+      tags:
+      - general
+swagger: "2.0"

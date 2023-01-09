@@ -6,23 +6,24 @@ import (
 
 	"github.com/cafo13/animal-facts/api/database"
 	"github.com/cafo13/animal-facts/api/types"
+
 	log "github.com/sirupsen/logrus"
 )
-
-type DataHandler struct {
-	Handler database.DatabaseHandler
-}
 
 type FactHandler interface {
 	GetFactById(id string) (*types.Fact, error)
 	GetRandomFact() (*types.Fact, error)
 }
 
-func NewFactHandler(databaseHandler database.DatabaseHandler) (FactHandler, error) {
-	return DataHandler{Handler: databaseHandler}, nil
+type FactDataHandler struct {
+	Handler database.DatabaseHandler
 }
 
-func (dh DataHandler) GetFactById(id string) (*types.Fact, error) {
+func NewFactHandler(databaseHandler database.DatabaseHandler) FactHandler {
+	return FactDataHandler{Handler: databaseHandler}
+}
+
+func (dh FactDataHandler) GetFactById(id string) (*types.Fact, error) {
 	item, err := dh.Handler.GetItem(id)
 	if err != nil {
 		return nil, err
@@ -30,7 +31,7 @@ func (dh DataHandler) GetFactById(id string) (*types.Fact, error) {
 	return item, nil
 }
 
-func (dh DataHandler) GetRandomFact() (*types.Fact, error) {
+func (dh FactDataHandler) GetRandomFact() (*types.Fact, error) {
 	itemCount, err := dh.Handler.GetItemCount()
 	if err != nil {
 		return nil, err

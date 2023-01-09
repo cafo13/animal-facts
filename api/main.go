@@ -1,15 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/cafo13/animal-facts/api/database"
 	"github.com/cafo13/animal-facts/api/facts"
-	"github.com/cafo13/animal-facts/api/types"
+	"github.com/cafo13/animal-facts/api/router"
 
-	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,59 +27,30 @@ func setupDatabaseHandler(connectionString string, mongoDatabaseName string) *da
 	return &databaseHandler
 }
 
-func setupRouter(databaseHandler *database.DatabaseHandler) *gin.Engine {
-	router := gin.Default()
-
-	router.GET("/health", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET")
-		c.String(http.StatusOK, "healthy\n")
-	})
-
-	router.GET("/fact", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET")
-
-		var fact *types.Fact
-
-		factHandler, err := facts.NewFactHandler(*databaseHandler)
-		if err != nil {
-			log.Error("Error on initializing fact handler", err)
-		}
-
-		fact, err = factHandler.GetRandomFact()
-		if err != nil {
-			fmt.Println("Error on getting random fact", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"Fact": types.Fact{}, "error": err.Error()})
-		} else {
-			c.JSON(http.StatusOK, gin.H{"Fact": fact})
-		}
-	})
-
-	router.GET("/fact/:id", func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET")
-
-		var fact *types.Fact
-		id := c.Params.ByName("id")
-
-		factHandler, err := facts.NewFactHandler(*databaseHandler)
-		if err != nil {
-			log.Error("Error on initializing fact handler", err)
-		}
-
-		fact, err = factHandler.GetFactById(id)
-		if err != nil {
-			fmt.Println(fmt.Sprintf("Error on getting fact by id %s", id), err)
-			c.JSON(http.StatusNotFound, gin.H{"Fact": types.Fact{}, "error": err.Error()})
-		} else {
-			c.JSON(http.StatusOK, gin.H{"Fact": fact})
-		}
-	})
-
-	return router
+func setupFactHandler(databaseHandler *database.DatabaseHandler) *facts.FactHandler {
+	factHandler := facts.NewFactHandler(*databaseHandler)
+	return &factHandler
 }
 
+func setupRouter(factHandler *facts.FactHandler) *router.Router {
+	router := router.NewRouter(*factHandler)
+	return &router
+}
+
+// @title           Animal Facts API
+// @version         1.0
+// @description     Get awesome facts about animals.
+// @termsOfService  https://animalfact.app/terms
+
+// @contact.name   Animal Facts API
+// @contact.url    https://animalfacts.app/support
+// @contact.email  support@animalfacts.app
+
+// @license.name  MIT
+// @license.url   https://github.com/cafo13/animal-facts/blob/main/LICENSE
+
+// @host      https://animalfacts.app
+// @BasePath  /api/v1
 func main() {
 	setupLogger()
 
@@ -90,6 +58,9 @@ func main() {
 	mongoDatabaseName := getEnvVar("MONGODB_DBNAME", "animalfacts")
 	apiPort := getEnvVar("API_PORT", "8080")
 
-	router := setupRouter(setupDatabaseHandler(mongoDatabaseConnectionString, mongoDatabaseName))
-	router.Run(":" + apiPort)
+	databaseHandler := setupDatabaseHandler(mongoDatabaseConnectionString, mongoDatabaseName)
+	factHandler := setupFactHandler(databaseHandler)
+	router := setupRouter(factHandler)
+
+	router.StartRouter(apiPort)
 }

@@ -1,0 +1,101 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Get awesome facts about animals.",
+        "title": "Animal Facts API",
+        "termsOfService": "https://animalfact.app/terms",
+        "contact": {
+            "name": "Animal Facts API",
+            "url": "https://animalfacts.app/support",
+            "email": "support@animalfacts.app"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/cafo13/animal-facts/blob/main/LICENSE"
+        },
+        "version": "1.0"
+    },
+    "host": "https://animalfacts.app",
+    "basePath": "/api/v1",
+    "paths": {
+        "/fact": {
+            "get": {
+                "description": "Getting a random animal fact",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facts"
+                ],
+                "summary": "Get random animal fact",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Fact"
+                        }
+                    }
+                }
+            }
+        },
+        "/fact/:id": {
+            "get": {
+                "description": "Getting an animal fact by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facts"
+                ],
+                "summary": "Get animal fact by ID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.Fact"
+                        }
+                    }
+                }
+            }
+        },
+        "/healthy": {
+            "get": {
+                "description": "Checking the health of the API",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "general"
+                ],
+                "summary": "Get health status",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "types.Fact": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

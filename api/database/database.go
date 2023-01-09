@@ -5,22 +5,22 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/cafo13/animal-facts/api/types"
+
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/cafo13/animal-facts/api/types"
 )
-
-type Database struct {
-	MongoDatabaseUri  string
-	MongoDatabaseName string
-}
 
 type DatabaseHandler interface {
 	GetItem(id string) (*types.Fact, error)
 	GetItemCount() (int64, error)
+}
+
+type Database struct {
+	MongoDatabaseUri  string
+	MongoDatabaseName string
 }
 
 func NewDatabaseHandler(mongoDatabaseUri string, mongoDatabaseName string) DatabaseHandler {
