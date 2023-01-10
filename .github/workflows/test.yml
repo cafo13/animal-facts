@@ -15,12 +15,12 @@ jobs:
     steps:
       - name: Check out Code
         uses: actions/checkout@v3
-      - name: cd into to working directory
-        run: cd ./frontend
       - name: install dependencies
         run: yarn install
+        working-directory: ./frontend
       - name: run tests
         run: yarn test
+        working-directory: ./frontend
   test-api:
     name: Test API
     runs-on: ubuntu-latest
@@ -29,9 +29,9 @@ jobs:
     steps:
       - name: Check out Code
         uses: actions/checkout@v3
-      - name: cd into to working directory
-        run: cd ./api
       - name: install dependencies
         run: go mod download && go mod verify
+        working-directory: ./api
       - name: run tests
         run: go test ./...
+        working-directory: ./api
