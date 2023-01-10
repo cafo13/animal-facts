@@ -19,7 +19,7 @@ export type FactApiResponse = {
     providedIn: 'root'
 })
 export class AnimalfactsService {
-    apiBaseDomain = 'http://localhost:8080'
+    apiBaseDomain = 'http://localhost:8080/api/v1'
 
     constructor(private http: HttpClient) {}
 
