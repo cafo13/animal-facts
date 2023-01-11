@@ -19,8 +19,8 @@ jobs:
   test:
     name: test
     runs-on: ubuntu-latest
-    container:
-      image: node:16.16.0
+    env:
+      CHROME_BIN: '/usr/bin/chromium'
     steps:
       - name: Check out Code
         uses: actions/checkout@v3
@@ -29,6 +29,12 @@ jobs:
           node-version: 16
       - name: install dependencies
         run: yarn install --frozen-lockfile
+      - name:
+        run: |
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+          sudo apt-get update
+          sudo apt-get install google-chrome-stable
         working-directory: ./frontend
       - name: run tests
         run: yarn test:ci
