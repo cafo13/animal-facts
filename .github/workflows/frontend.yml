@@ -1,16 +1,16 @@
-name: api
+name: frontend
 
 on:
   push:
     branches: ["main"]
     paths:
-      - api/**
-      - .github/workflows/**
+      - frontend/**
+      - .github/workflows/frontend.yml
   pull_request:
     branches: ["main"]
     paths:
-      - api/**
-      - .github/workflows/**
+      - frontend/**
+      - .github/workflows/frontend.yml
 
 env:
   REGISTRY: ghcr.io
@@ -20,16 +20,19 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     container:
-      image: golang:1.19.4
+      image: node:16.16.0
     steps:
       - name: Check out Code
         uses: actions/checkout@v3
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16
       - name: install dependencies
-        run: go mod download && go mod verify
-        working-directory: ./api
+        run: yarn install --frozen-lockfile
+        working-directory: ./frontend
       - name: run tests
-        run: go test ./...
-        working-directory: ./api
+        run: yarn test:ci
+        working-directory: ./frontend
   build:
     name: build
     runs-on: ubuntu-latest
@@ -37,7 +40,7 @@ jobs:
       contents: read
       packages: write
     env:
-      IMAGE_NAME: ${{ github.repository }}/api
+      IMAGE_NAME: ${{ github.repository }}/frontend
     steps:
       - name: Check out Code
         uses: actions/checkout@v3
@@ -55,7 +58,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: ./api
+          context: ./frontend
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
