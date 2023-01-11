@@ -24,19 +24,16 @@ jobs:
     env:
       CHROME_BIN: '/usr/bin/chromium'
     steps:
-      - name: Check out Code
-        uses: actions/checkout@v3
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 16
-      - name: install dependencies
-        run: yarn install --frozen-lockfile
       - name: install chrome
         run: |
           wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
           sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
           apt-get update
           apt-get install google-chrome-stable -y
+      - name: Check out Code
+        uses: actions/checkout@v3
+      - name: install dependencies
+        run: yarn install --frozen-lockfile
         working-directory: ./frontend
       - name: run tests
         run: yarn test:ci
