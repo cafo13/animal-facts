@@ -19,6 +19,8 @@ jobs:
   test:
     name: test
     runs-on: ubuntu-latest
+    container:
+      image: node:16.16.0
     env:
       CHROME_BIN: '/usr/bin/chromium'
     steps:
