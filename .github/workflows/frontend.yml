@@ -22,7 +22,7 @@ jobs:
     container:
       image: node:16.16.0
     env:
-      CHROME_BIN: '/usr/bin/chromium'
+      CHROME_BIN: '/usr/bin/google-chrome'
     steps:
       - name: install chrome
         run: |
