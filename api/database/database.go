@@ -3,48 +3,75 @@ package database
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/cafo13/animal-facts/api/types"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DatabaseHandler interface {
+	AddItem(*types.Fact) error
+	CloseConnection() error
+	DeleteItem(id string) error
 	GetItem(id string) (*types.Fact, error)
 	GetItemCount() (int64, error)
 }
 
 type Database struct {
-	MongoDatabaseUri  string
-	MongoDatabaseName string
+	Client     *mongo.Client
+	Context    *context.Context
+	Collection *mongo.Collection
 }
 
-func NewDatabaseHandler(mongoDatabaseUri string, mongoDatabaseName string) DatabaseHandler {
-	return Database{MongoDatabaseUri: mongoDatabaseUri, MongoDatabaseName: mongoDatabaseName}
+func NewDatabaseHandler(mongoDatabaseUri string, mongoDatabaseName string, mongoCollectionName string) (DatabaseHandler, error) {
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoDatabaseUri))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to initialize mongo db client")
+	}
+	ctx := context.Background()
+	err = client.Connect(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to connect to mongo db")
+	}
+
+	database := client.Database(mongoDatabaseName)
+	collection := database.Collection(mongoCollectionName)
+
+	return Database{Client: client, Collection: collection, Context: &ctx}, nil
+}
+
+func (db Database) AddItem(fact *types.Fact) error {
+	_, err := db.Collection.InsertOne(context.Background(), fact)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("failed to insert new item to database, item: %+v", fact))
+	}
+
+	return nil
+}
+
+func (db Database) CloseConnection() error {
+	err := db.Client.Disconnect(*db.Context)
+	if err != nil {
+		return errors.Wrap(err, "failed to disconnect from the database")
+	}
+
+	return nil
+}
+
+func (db Database) DeleteItem(id string) error {
+	_, err := db.Collection.DeleteOne(context.Background(), bson.M{"Id": id})
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("failed to delete item from database, item with id %s", id))
+	}
+
+	return nil
 }
 
 func (db Database) GetItem(id string) (*types.Fact, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(db.MongoDatabaseUri))
-	if err != nil {
-		log.Fatal("Failed to initialize mongo db client", err)
-		return nil, err
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal("Failed to connect to mongo db", err)
-		return nil, err
-	}
-	defer client.Disconnect(ctx)
-
-	database := client.Database(db.MongoDatabaseName)
-	collection := database.Collection("animalfacts")
-
-	result := collection.FindOne(context.Background(), bson.M{"Id": id})
+	result := db.Collection.FindOne(context.Background(), bson.M{"Id": id})
 	fact := &types.Fact{}
 	result.Decode(fact)
 
@@ -56,23 +83,7 @@ func (db Database) GetItem(id string) (*types.Fact, error) {
 }
 
 func (db Database) GetItemCount() (int64, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(db.MongoDatabaseUri))
-	if err != nil {
-		log.Fatal("Failed to initialize mongo db client", err)
-		return -1, err
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal("Failed to connect to mongo db", err)
-		return -1, err
-	}
-	defer client.Disconnect(ctx)
-
-	database := client.Database(db.MongoDatabaseName)
-	collection := database.Collection("animalfacts")
-
-	count, err := collection.EstimatedDocumentCount(ctx, nil)
+	count, err := db.Collection.EstimatedDocumentCount(*db.Context, nil)
 	if err != nil {
 		return -1, err
 	}

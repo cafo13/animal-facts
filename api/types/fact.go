@@ -1,8 +1,9 @@
 package types
 
 type Fact struct {
-	Id       string
-	Text     string
-	Category string
-	Source   string
+	Id       string `json:"id"`
+	Text     string `json:"text"`
+	Category string `json:"category"`
+	Source   string `json:"source"`
+	Approved bool   `json:"approved"`
 }

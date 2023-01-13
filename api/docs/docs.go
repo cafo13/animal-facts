@@ -10,10 +10,9 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "https://animalfact.app/terms",
         "contact": {
             "name": "Animal Facts API",
-            "url": "https://animalfacts.app/support",
+            "url": "https://animalfacts.app",
             "email": "support@animalfacts.app"
         },
         "license": {
@@ -41,6 +40,56 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/types.Fact"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/router.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Adding an animal fact",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facts"
+                ],
+                "summary": "Add a new animal fact",
+                "parameters": [
+                    {
+                        "description": "a new fact",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.Fact"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/types.Fact"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/router.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/router.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -60,6 +109,36 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/types.Fact"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/router.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Deleting an animal fact",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "facts"
+                ],
+                "summary": "Delete an animal fact",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/router.MessageResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/router.ErrorResponse"
                         }
                     }
                 }
@@ -87,9 +166,26 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "router.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {}
+            }
+        },
+        "router.MessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "types.Fact": {
             "type": "object",
             "properties": {
+                "approved": {
+                    "type": "boolean"
+                },
                 "category": {
                     "type": "string"
                 },
@@ -114,7 +210,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Animal Facts API",
-	Description:      "Get awesome facts about animals.",
+	Description:      "Awesome facts about animals.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

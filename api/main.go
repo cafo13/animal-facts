@@ -22,9 +22,12 @@ func setupLogger() {
 	log.SetLevel(log.InfoLevel)
 }
 
-func setupDatabaseHandler(connectionString string, mongoDatabaseName string) *database.DatabaseHandler {
-	databaseHandler := database.NewDatabaseHandler(connectionString, mongoDatabaseName)
-	return &databaseHandler
+func setupDatabaseHandler(connectionString string, mongoDatabaseName string, mongoCollectionName string) (*database.DatabaseHandler, error) {
+	databaseHandler, err := database.NewDatabaseHandler(connectionString, mongoDatabaseName, mongoCollectionName)
+	if err != nil {
+		return nil, err
+	}
+	return &databaseHandler, nil
 }
 
 func setupFactHandler(databaseHandler *database.DatabaseHandler) *facts.FactHandler {
@@ -39,11 +42,10 @@ func setupRouter(factHandler *facts.FactHandler) *router.Router {
 
 // @title           Animal Facts API
 // @version         1.0
-// @description     Get awesome facts about animals.
-// @termsOfService  https://animalfact.app/terms
+// @description     Awesome facts about animals.
 
 // @contact.name   Animal Facts API
-// @contact.url    https://animalfacts.app/support
+// @contact.url    https://animalfacts.app
 // @contact.email  support@animalfacts.app
 
 // @license.name  MIT
@@ -55,10 +57,15 @@ func main() {
 	setupLogger()
 
 	mongoDatabaseConnectionString := getEnvVar("MONGODB_CONNSTRING", "mongodb://animalfacts:animalfacts@localhost:27017")
-	mongoDatabaseName := getEnvVar("MONGODB_DBNAME", "animalfacts")
+	mongoDatabaseName := getEnvVar("MONGODB_DB_NAME", "animalfacts")
+	mongoCollectionName := getEnvVar("MONGODB_COLLECTION_NAME", "animalfacts")
 	apiPort := getEnvVar("API_PORT", "8080")
 
-	databaseHandler := setupDatabaseHandler(mongoDatabaseConnectionString, mongoDatabaseName)
+	databaseHandler, err := setupDatabaseHandler(mongoDatabaseConnectionString, mongoDatabaseName, mongoCollectionName)
+	if err != nil {
+		log.Fatal("Failed to setup database handler", err)
+	}
+
 	factHandler := setupFactHandler(databaseHandler)
 	router := setupRouter(factHandler)
 

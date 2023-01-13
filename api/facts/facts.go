@@ -11,6 +11,8 @@ import (
 )
 
 type FactHandler interface {
+	AddFact(*types.Fact) error
+	DeleteFact(id string) error
 	GetFactById(id string) (*types.Fact, error)
 	GetRandomFact() (*types.Fact, error)
 }
@@ -21,6 +23,22 @@ type FactDataHandler struct {
 
 func NewFactHandler(databaseHandler database.DatabaseHandler) FactHandler {
 	return FactDataHandler{Handler: databaseHandler}
+}
+
+func (dh FactDataHandler) AddFact(fact *types.Fact) error {
+	err := dh.Handler.AddItem(fact)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dh FactDataHandler) DeleteFact(id string) error {
+	err := dh.Handler.DeleteItem(id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (dh FactDataHandler) GetFactById(id string) (*types.Fact, error) {

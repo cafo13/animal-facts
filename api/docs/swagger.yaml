@@ -1,7 +1,18 @@
 basePath: /api/v1
 definitions:
+  router.ErrorResponse:
+    properties:
+      error: {}
+    type: object
+  router.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
   types.Fact:
     properties:
+      approved:
+        type: boolean
       category:
         type: string
       id:
@@ -16,12 +27,11 @@ info:
   contact:
     email: support@animalfacts.app
     name: Animal Facts API
-    url: https://animalfacts.app/support
-  description: Get awesome facts about animals.
+    url: https://animalfacts.app
+  description: Awesome facts about animals.
   license:
     name: MIT
     url: https://github.com/cafo13/animal-facts/blob/main/LICENSE
-  termsOfService: https://animalfact.app/terms
   title: Animal Facts API
   version: "1.0"
 paths:
@@ -35,10 +45,59 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/types.Fact'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/router.ErrorResponse'
       summary: Get random animal fact
       tags:
       - facts
+    post:
+      consumes:
+      - application/json
+      description: Adding an animal fact
+      parameters:
+      - description: a new fact
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.Fact'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/types.Fact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/router.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/router.ErrorResponse'
+      summary: Add a new animal fact
+      tags:
+      - facts
   /fact/:id:
+    delete:
+      description: Deleting an animal fact
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/router.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/router.ErrorResponse'
+      summary: Delete an animal fact
+      tags:
+      - facts
     get:
       description: Getting an animal fact by ID
       produces:
@@ -48,6 +107,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/types.Fact'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/router.ErrorResponse'
       summary: Get animal fact by ID
       tags:
       - facts

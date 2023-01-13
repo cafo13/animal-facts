@@ -9,6 +9,7 @@ import (
 	"github.com/cafo13/animal-facts/api/types"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -23,6 +24,14 @@ type GinRouter interface {
 type Router struct {
 	Router      *gin.Engine
 	FactHandler facts.FactHandler
+}
+
+type MessageResponse struct {
+	Message string
+}
+
+type ErrorResponse struct {
+	Error error
 }
 
 func NewRouter(factHandler facts.FactHandler) Router {
@@ -48,6 +57,7 @@ func (r Router) GetHealth(context *gin.Context) {
 // @Tags facts
 // @Produce json
 // @Success 200 {object} types.Fact
+// @Failure 500 {object} ErrorResponse
 // @Router /fact [get]
 func (r Router) GetRandomFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
@@ -57,10 +67,10 @@ func (r Router) GetRandomFact(context *gin.Context) {
 
 	fact, err := r.FactHandler.GetRandomFact()
 	if err != nil {
-		fmt.Println("Error on getting random fact", err)
-		context.JSON(http.StatusInternalServerError, gin.H{"Fact": types.Fact{}, "error": err.Error()})
+		log.Errorf("Error on getting random fact", err)
+		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
 	} else {
-		context.JSON(http.StatusOK, gin.H{"Fact": fact})
+		context.IndentedJSON(http.StatusOK, fact)
 	}
 }
 
@@ -70,6 +80,7 @@ func (r Router) GetRandomFact(context *gin.Context) {
 // @Tags facts
 // @Produce json
 // @Success 200 {object} types.Fact
+// @Failure 404 {object} ErrorResponse
 // @Router /fact/:id [get]
 func (r Router) GetFactById(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
@@ -80,10 +91,64 @@ func (r Router) GetFactById(context *gin.Context) {
 
 	fact, err := r.FactHandler.GetFactById(id)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Error on getting fact by id %s", id), err)
-		context.JSON(http.StatusNotFound, gin.H{"Fact": types.Fact{}, "error": err.Error()})
+		log.Errorf(fmt.Sprintf("Error on getting fact by id %s", id), err)
+		context.JSON(http.StatusNotFound, gin.H{"Error": err.Error()})
 	} else {
-		context.JSON(http.StatusOK, gin.H{"Fact": fact})
+		context.IndentedJSON(http.StatusOK, fact)
+	}
+}
+
+// @Summary Add a new animal fact
+// @Schemes https
+// @Description Adding an animal fact
+// @Tags facts
+// @Accept json
+// @Param request body types.Fact true "a new fact"
+// @Produce json
+// @Success 201 {object} types.Fact
+// @Failure 400 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /fact [post]
+func (r Router) AddFact(context *gin.Context) {
+	context.Header("Access-Control-Allow-Origin", "*")
+	context.Header("Access-Control-Allow-Methods", "POST")
+
+	var fact *types.Fact
+	err := context.BindJSON(&fact)
+	if err != nil {
+		log.Errorf("error on getting fact from json body", err)
+		context.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+	}
+
+	err = r.FactHandler.AddFact(fact)
+	if err != nil {
+		log.Errorf("error on adding new fact", err)
+		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+	} else {
+		context.IndentedJSON(http.StatusCreated, fact)
+	}
+}
+
+// @Summary Delete an animal fact
+// @Schemes https
+// @Description Deleting an animal fact
+// @Tags facts
+// @Produce json
+// @Success 200 {object} MessageResponse
+// @Failure 500 {object} ErrorResponse
+// @Router /fact/:id [delete]
+func (r Router) DeleteFact(context *gin.Context) {
+	context.Header("Access-Control-Allow-Origin", "*")
+	context.Header("Access-Control-Allow-Methods", "DELETE")
+
+	id := context.Params.ByName("id")
+
+	err := r.FactHandler.DeleteFact(id)
+	if err != nil {
+		log.Errorf("error on deleting fact", err)
+		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+	} else {
+		context.JSON(http.StatusOK, gin.H{"Message": "deleted fact successfully"})
 	}
 }
 
@@ -102,6 +167,14 @@ func (r Router) StartRouter(port string) {
 
 		v1.GET("/fact/:id", func(c *gin.Context) {
 			r.GetFactById(c)
+		})
+
+		v1.POST("/fact", func(c *gin.Context) {
+			r.AddFact(c)
+		})
+
+		v1.DELETE("/fact/:id", func(c *gin.Context) {
+			r.DeleteFact(c)
 		})
 	}
 
