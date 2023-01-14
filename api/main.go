@@ -35,9 +35,9 @@ func setupFactHandler(databaseHandler *database.DatabaseHandler) *facts.FactHand
 	return &factHandler
 }
 
-func setupRouter(factHandler *facts.FactHandler) *router.Router {
+func setupRouter(factHandler *facts.FactHandler) router.GinRouter {
 	router := router.NewRouter(*factHandler)
-	return &router
+	return router
 }
 
 // @title           Animal Facts API
