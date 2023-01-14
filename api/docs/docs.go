@@ -50,7 +50,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Adding an animal fact",
+                "description": "Updating an animal fact",
                 "consumes": [
                     "application/json"
                 ],
@@ -60,10 +60,10 @@ const docTemplate = `{
                 "tags": [
                     "facts"
                 ],
-                "summary": "Add a new animal fact",
+                "summary": "Update an existing animal fact",
                 "parameters": [
                     {
-                        "description": "a new fact",
+                        "description": "an updated fact",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -73,8 +73,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created",
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/types.Fact"
                         }
@@ -83,6 +83,12 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/router.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/router.MessageResponse"
                         }
                     },
                     "500": {
@@ -96,14 +102,14 @@ const docTemplate = `{
         },
         "/fact/:id": {
             "get": {
-                "description": "Getting an animal fact by ID",
+                "description": "Getting an animal fact by id",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "facts"
                 ],
-                "summary": "Get animal fact by ID",
+                "summary": "Get animal fact by id",
                 "responses": {
                     "200": {
                         "description": "OK",

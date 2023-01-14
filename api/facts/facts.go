@@ -11,10 +11,12 @@ import (
 )
 
 type FactHandler interface {
-	AddFact(*types.Fact) error
+	AddFact(fact *types.Fact) error
 	DeleteFact(id string) error
+	FactExists(id string) bool
 	GetFactById(id string) (*types.Fact, error)
 	GetRandomFact() (*types.Fact, error)
+	UpdateFact(id string, dact *types.Fact) error
 }
 
 type FactDataHandler struct {
@@ -33,8 +35,20 @@ func (dh FactDataHandler) AddFact(fact *types.Fact) error {
 	return nil
 }
 
+func (dh FactDataHandler) FactExists(id string) bool {
+	return dh.Handler.ItemExists(id)
+}
+
 func (dh FactDataHandler) DeleteFact(id string) error {
 	err := dh.Handler.DeleteItem(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dh FactDataHandler) UpdateFact(id string, fact *types.Fact) error {
+	err := dh.Handler.UpdateItem(id, fact)
 	if err != nil {
 		return err
 	}

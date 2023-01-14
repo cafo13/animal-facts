@@ -55,9 +55,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Adding an animal fact
+      description: Updating an animal fact
       parameters:
-      - description: a new fact
+      - description: an updated fact
         in: body
         name: request
         required: true
@@ -66,19 +66,23 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
-          description: Created
+        "200":
+          description: OK
           schema:
             $ref: '#/definitions/types.Fact'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/router.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/router.MessageResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/router.ErrorResponse'
-      summary: Add a new animal fact
+      summary: Update an existing animal fact
       tags:
       - facts
   /fact/:id:
@@ -99,7 +103,7 @@ paths:
       tags:
       - facts
     get:
-      description: Getting an animal fact by ID
+      description: Getting an animal fact by id
       produces:
       - application/json
       responses:
@@ -111,7 +115,7 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/router.ErrorResponse'
-      summary: Get animal fact by ID
+      summary: Get animal fact by id
       tags:
       - facts
   /healthy:

@@ -13,11 +13,13 @@ import (
 )
 
 type DatabaseHandler interface {
-	AddItem(*types.Fact) error
+	AddItem(fact *types.Fact) error
 	CloseConnection() error
 	DeleteItem(id string) error
 	GetItem(id string) (*types.Fact, error)
 	GetItemCount() (int64, error)
+	ItemExists(id string) bool
+	UpdateItem(id string, fact *types.Fact) error
 }
 
 type Database struct {
@@ -62,7 +64,7 @@ func (db Database) CloseConnection() error {
 }
 
 func (db Database) DeleteItem(id string) error {
-	_, err := db.Collection.DeleteOne(context.Background(), bson.M{"Id": id})
+	_, err := db.Collection.DeleteOne(context.Background(), bson.M{"id": id})
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("failed to delete item from database, item with id %s", id))
 	}
@@ -71,7 +73,7 @@ func (db Database) DeleteItem(id string) error {
 }
 
 func (db Database) GetItem(id string) (*types.Fact, error) {
-	result := db.Collection.FindOne(context.Background(), bson.M{"Id": id})
+	result := db.Collection.FindOne(context.Background(), bson.M{"id": id})
 	fact := &types.Fact{}
 	result.Decode(fact)
 
@@ -89,4 +91,24 @@ func (db Database) GetItemCount() (int64, error) {
 	}
 
 	return count, nil
+}
+
+func (db Database) ItemExists(id string) bool {
+	result := db.Collection.FindOne(context.Background(), bson.M{"id": id})
+
+	if result == nil {
+		return false
+	}
+
+	return true
+}
+
+func (db Database) UpdateItem(id string, fact *types.Fact) error {
+	fact.Id = id
+	_, err := db.Collection.UpdateOne(context.Background(), bson.M{"id": id}, fact)
+	if err != nil {
+		return errors.Wrap(err, fmt.Sprintf("failed to update item %s in database, item: %+v", id, fact))
+	}
+
+	return nil
 }
