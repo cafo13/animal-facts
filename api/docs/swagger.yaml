@@ -55,9 +55,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Updating an animal fact
+      description: Adding an animal fact
       parameters:
-      - description: an updated fact
+      - description: a new fact
         in: body
         name: request
         required: true
@@ -66,23 +66,19 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             $ref: '#/definitions/types.Fact'
         "400":
           description: Bad Request
           schema:
             $ref: '#/definitions/router.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/router.MessageResponse'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/router.ErrorResponse'
-      summary: Update an existing animal fact
+      summary: Add a new animal fact
       tags:
       - facts
   /fact/:id:
@@ -116,6 +112,39 @@ paths:
           schema:
             $ref: '#/definitions/router.ErrorResponse'
       summary: Get animal fact by id
+      tags:
+      - facts
+    put:
+      consumes:
+      - application/json
+      description: Updating an animal fact
+      parameters:
+      - description: an updated fact
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.Fact'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Fact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/router.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/router.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/router.ErrorResponse'
+      summary: Update an existing animal fact
       tags:
       - facts
   /healthy:

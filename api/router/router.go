@@ -143,7 +143,7 @@ func (r Router) AddFact(context *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} MessageResponse
 // @Failure 500 {object} ErrorResponse
-// @Router /fact [post]
+// @Router /fact/:id [put]
 func (r Router) UpdateFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "PUT")
