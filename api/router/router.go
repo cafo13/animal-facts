@@ -9,6 +9,7 @@ import (
 	"github.com/cafo13/animal-facts/api/types"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -70,10 +71,13 @@ func (r Router) GetRandomFact(context *gin.Context) {
 
 	fact, err := r.FactHandler.GetRandomFact()
 	if err != nil {
-		log.Error("Error on getting random fact", err)
-		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		wrappedError := errors.Wrap(err, "error on getting random fact")
+		log.Error(wrappedError)
+		context.JSON(http.StatusInternalServerError, gin.H{"Error": wrappedError.Error()})
+		return
 	} else {
 		context.IndentedJSON(http.StatusOK, fact)
+		return
 	}
 }
 
@@ -94,10 +98,13 @@ func (r Router) GetFactById(context *gin.Context) {
 
 	fact, err := r.FactHandler.GetFactById(id)
 	if err != nil {
-		log.Error(fmt.Sprintf("Error on getting fact by id %s", id), err)
-		context.JSON(http.StatusNotFound, gin.H{"Error": err.Error()})
+		wrappedError := errors.Wrap(err, fmt.Sprintf("error on getting fact by id %s", id))
+		log.Error(wrappedError)
+		context.JSON(http.StatusNotFound, gin.H{"Error": wrappedError.Error()})
+		return
 	} else {
 		context.IndentedJSON(http.StatusOK, fact)
+		return
 	}
 }
 
@@ -119,16 +126,21 @@ func (r Router) AddFact(context *gin.Context) {
 	var fact *types.Fact
 	err := context.BindJSON(&fact)
 	if err != nil {
-		log.Error("error on getting fact from json body", err)
-		context.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		wrappedError := errors.Wrap(err, "error on getting fact from json body")
+		log.Error(wrappedError)
+		context.JSON(http.StatusBadRequest, gin.H{"Error": wrappedError.Error()})
+		return
 	}
 
 	err = r.FactHandler.AddFact(fact)
 	if err != nil {
-		log.Error("error on adding new fact", err)
-		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		wrappedError := errors.Wrap(err, "error on adding new fact")
+		log.Error(wrappedError)
+		context.JSON(http.StatusInternalServerError, gin.H{"Error": wrappedError.Error()})
+		return
 	} else {
 		context.IndentedJSON(http.StatusCreated, fact)
+		return
 	}
 }
 
@@ -137,7 +149,7 @@ func (r Router) AddFact(context *gin.Context) {
 // @Description Updating an animal fact
 // @Tags facts
 // @Accept json
-// @Param request body types.Fact true "an updated fact"
+// @Param request body interface{} true "an updated fact"
 // @Produce json
 // @Success 200 {object} types.Fact
 // @Failure 400 {object} ErrorResponse
@@ -149,26 +161,38 @@ func (r Router) UpdateFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Methods", "PUT")
 
 	id := context.Params.ByName("id")
-	exists := r.FactHandler.FactExists(id)
-	if !exists {
-		log.Error(fmt.Sprintf("error on updating fact, fact with id %s does not exists", id))
-		context.JSON(http.StatusNotFound, gin.H{"Message": fmt.Sprintf("fact with id %s does not exists", id)})
+	exists, err := r.FactHandler.FactExists(id)
+	if err != nil {
+		wrappedError := errors.Wrap(err, fmt.Sprintf("error on updating fact, error on checking, if fact with id %s exists", id))
+		log.Error(wrappedError)
+		context.JSON(http.StatusInternalServerError, gin.H{"Message": wrappedError.Error()})
+		return
+	} else if !exists {
+		errorMsg := fmt.Sprintf("error on updating fact, fact with id %s does not exists", id)
+		log.Error(errorMsg)
+		context.JSON(http.StatusNotFound, gin.H{"Message": errorMsg})
+		return
 	}
 
-	var fact *types.Fact
-	err := context.BindJSON(&fact)
+	var fact *interface{}
+	err = context.BindJSON(&fact)
 
 	if err != nil {
-		log.Error("error on getting fact from json body", err)
-		context.JSON(http.StatusBadRequest, gin.H{"Error": err.Error()})
+		wrappedError := errors.Wrap(err, "error on getting fact from json body")
+		log.Error(wrappedError)
+		context.JSON(http.StatusBadRequest, gin.H{"Error": wrappedError})
+		return
 	}
 
-	err = r.FactHandler.UpdateFact(id, fact)
+	updatedFact, err := r.FactHandler.UpdateFact(id, fact)
 	if err != nil {
-		log.Error("error on updating fact", err)
-		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		wrappedError := errors.Wrap(err, "error on updating fact")
+		log.Error(wrappedError)
+		context.JSON(http.StatusInternalServerError, gin.H{"Error": wrappedError})
+		return
 	} else {
-		context.IndentedJSON(http.StatusOK, fact)
+		context.IndentedJSON(http.StatusOK, updatedFact)
+		return
 	}
 }
 
@@ -188,10 +212,13 @@ func (r Router) DeleteFact(context *gin.Context) {
 
 	err := r.FactHandler.DeleteFact(id)
 	if err != nil {
-		log.Error(fmt.Sprintf("error on deleting fact with id %s", id), err)
-		context.JSON(http.StatusInternalServerError, gin.H{"Error": err.Error()})
+		wrappedError := errors.Wrap(err, fmt.Sprintf("error on deleting fact with id %s", id))
+		log.Error(wrappedError)
+		context.JSON(http.StatusInternalServerError, gin.H{"Error": wrappedError})
+		return
 	} else {
 		context.JSON(http.StatusOK, gin.H{"Message": "deleted fact successfully"})
+		return
 	}
 }
 

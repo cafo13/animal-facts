@@ -41,12 +41,11 @@ func setupRouter(factHandler *facts.FactHandler) router.GinRouter {
 }
 
 // @title           Animal Facts API
-// @version         1.0
+// @version         0.0.1
 // @description     Awesome facts about animals.
 
 // @contact.name   Animal Facts API
 // @contact.url    https://animalfacts.app
-// @contact.email  support@animalfacts.app
 
 // @license.name  MIT
 // @license.url   https://github.com/cafo13/animal-facts/blob/main/LICENSE

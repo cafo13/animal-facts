@@ -5,14 +5,13 @@
         "title": "Animal Facts API",
         "contact": {
             "name": "Animal Facts API",
-            "url": "https://animalfacts.app",
-            "email": "support@animalfacts.app"
+            "url": "https://animalfacts.app"
         },
         "license": {
             "name": "MIT",
             "url": "https://github.com/cafo13/animal-facts/blob/main/LICENSE"
         },
-        "version": "1.0"
+        "version": "0.0.1"
     },
     "host": "https://animalfacts.app",
     "basePath": "/api/v1",
@@ -131,7 +130,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.Fact"
+                            "type": "object"
                         }
                     }
                 ],

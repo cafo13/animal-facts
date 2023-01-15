@@ -25,7 +25,6 @@ definitions:
 host: https://animalfacts.app
 info:
   contact:
-    email: support@animalfacts.app
     name: Animal Facts API
     url: https://animalfacts.app
   description: Awesome facts about animals.
@@ -33,7 +32,7 @@ info:
     name: MIT
     url: https://github.com/cafo13/animal-facts/blob/main/LICENSE
   title: Animal Facts API
-  version: "1.0"
+  version: 0.0.1
 paths:
   /fact:
     get:
@@ -124,7 +123,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/types.Fact'
+          type: object
       produces:
       - application/json
       responses:

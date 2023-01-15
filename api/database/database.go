@@ -18,8 +18,8 @@ type DatabaseHandler interface {
 	DeleteItem(id string) error
 	GetItem(id string) (*types.Fact, error)
 	GetItemCount() (int64, error)
-	ItemExists(id string) bool
-	UpdateItem(id string, fact *types.Fact) error
+	ItemExists(id string) (bool, error)
+	UpdateItem(id string, fact *interface{}) (*types.Fact, error)
 }
 
 type Database struct {
@@ -93,22 +93,28 @@ func (db Database) GetItemCount() (int64, error) {
 	return count, nil
 }
 
-func (db Database) ItemExists(id string) bool {
+func (db Database) ItemExists(id string) (bool, error) {
 	result := db.Collection.FindOne(context.Background(), bson.M{"id": id})
-
-	if result == nil {
-		return false
+	err := result.Err()
+	if err == mongo.ErrNoDocuments {
+		return false, nil
+	} else if err != nil {
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
-func (db Database) UpdateItem(id string, fact *types.Fact) error {
-	fact.Id = id
-	_, err := db.Collection.UpdateOne(context.Background(), bson.M{"id": id}, fact)
+func (db Database) UpdateItem(id string, fact *interface{}) (*types.Fact, error) {
+	_, err := db.Collection.UpdateOne(context.Background(), bson.M{"id": id}, bson.M{"$set": fact})
 	if err != nil {
-		return errors.Wrap(err, fmt.Sprintf("failed to update item %s in database, item: %+v", id, fact))
+		return nil, errors.Wrap(err, fmt.Sprintf("failed to update item %s in database, item: %+v", id, fact))
 	}
 
-	return nil
+	updatedFact, err := db.GetItem(id)
+	if err != nil {
+		return nil, errors.Wrap(err, fmt.Sprintf("failed to get updated item %s from database", id))
+	}
+
+	return updatedFact, nil
 }

@@ -12,8 +12,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "Animal Facts API",
-            "url": "https://animalfacts.app",
-            "email": "support@animalfacts.app"
+            "url": "https://animalfacts.app"
         },
         "license": {
             "name": "MIT",
@@ -138,7 +137,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.Fact"
+                            "type": "object"
                         }
                     }
                 ],
@@ -255,7 +254,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "0.0.1",
 	Host:             "https://animalfacts.app",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
