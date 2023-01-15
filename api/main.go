@@ -22,8 +22,8 @@ func setupLogger() {
 	log.SetLevel(log.InfoLevel)
 }
 
-func setupDatabaseHandler(connectionString string, mongoDatabaseName string, mongoCollectionName string) (*database.DatabaseHandler, error) {
-	databaseHandler, err := database.NewDatabaseHandler(connectionString, mongoDatabaseName, mongoCollectionName)
+func setupDatabaseHandler(dbHost string, dbPort string, dbName string, dbUser string, dbPassword string) (*database.DatabaseHandler, error) {
+	databaseHandler, err := database.NewDatabaseHandler(dbHost, dbPort, dbName, dbUser, dbPassword)
 	if err != nil {
 		return nil, err
 	}
@@ -55,14 +55,16 @@ func setupRouter(factHandler *facts.FactHandler) router.GinRouter {
 func main() {
 	setupLogger()
 
-	mongoDatabaseConnectionString := getEnvVar("MONGODB_CONNSTRING", "mongodb://animalfacts:animalfacts@localhost:27017")
-	mongoDatabaseName := getEnvVar("MONGODB_DB_NAME", "animalfacts")
-	mongoCollectionName := getEnvVar("MONGODB_COLLECTION_NAME", "animalfacts")
+	pgHost := getEnvVar("DB_HOST", "localhost")
+	pgPort := getEnvVar("DB_PORT", "5432")
+	pgDatabase := getEnvVar("DB_NAME", "animalfacts")
+	pgUsername := getEnvVar("DB_USERNAME", "animalfacts")
+	pgPassword := getEnvVar("DB_PASSWOD", "animalfacts")
 	apiPort := getEnvVar("API_PORT", "8080")
 
-	databaseHandler, err := setupDatabaseHandler(mongoDatabaseConnectionString, mongoDatabaseName, mongoCollectionName)
+	databaseHandler, err := setupDatabaseHandler(pgHost, pgPort, pgDatabase, pgUsername, pgPassword)
 	if err != nil {
-		log.Fatal("Failed to setup database handler", err)
+		log.Fatal("failed to setup database handler", err)
 	}
 
 	factHandler := setupFactHandler(databaseHandler)

@@ -1,22 +1,19 @@
 package facts
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/cafo13/animal-facts/api/database"
-	"github.com/cafo13/animal-facts/api/types"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type FactHandler interface {
-	AddFact(fact *types.Fact) error
-	DeleteFact(id string) error
-	FactExists(id string) (bool, error)
-	GetFactById(id string) (*types.Fact, error)
-	GetRandomFact() (*types.Fact, error)
-	UpdateFact(id string, dact *interface{}) (*types.Fact, error)
+	CreateFact(fact *database.Fact) error
+	DeleteFact(id uint) error
+	GetFactById(id uint) (*database.Fact, error)
+	GetRandomFact() (*database.Fact, error)
+	UpdateFact(id uint, fact *database.Fact) (*database.Fact, error)
 }
 
 type FactDataHandler struct {
@@ -27,66 +24,67 @@ func NewFactHandler(databaseHandler database.DatabaseHandler) FactHandler {
 	return FactDataHandler{Handler: databaseHandler}
 }
 
-func (dh FactDataHandler) AddFact(fact *types.Fact) error {
-	err := dh.Handler.AddItem(fact)
+func (fdh FactDataHandler) CreateFact(fact *database.Fact) error {
+	err := fact.Create()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func (dh FactDataHandler) FactExists(id string) (bool, error) {
-	exists, err := dh.Handler.ItemExists(id)
+func (fdh FactDataHandler) UpdateFact(id uint, updatedFact *database.Fact) (*database.Fact, error) {
+	fact := updatedFact
+	fact.ID = id
+	err := fact.Update()
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return exists, nil
+	return fact, nil
 }
 
-func (dh FactDataHandler) DeleteFact(id string) error {
-	err := dh.Handler.DeleteItem(id)
+func (fdh FactDataHandler) DeleteFact(id uint) error {
+	var fact *database.Fact
+	fact.ID = id
+	err := fact.Delete()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func (dh FactDataHandler) UpdateFact(id string, fact *interface{}) (*types.Fact, error) {
-	updatedFact, err := dh.Handler.UpdateItem(id, fact)
+func (fdh FactDataHandler) GetFactById(id uint) (*database.Fact, error) {
+	var fact *database.Fact
+	fact.ID = id
+	err := fact.Read()
 	if err != nil {
 		return nil, err
 	}
-	return updatedFact, nil
+
+	return fact, nil
 }
 
-func (dh FactDataHandler) GetFactById(id string) (*types.Fact, error) {
-	item, err := dh.Handler.GetItem(id)
-	if err != nil {
-		return nil, err
-	}
-	return item, nil
-}
+func (fdh FactDataHandler) GetRandomFact() (*database.Fact, error) {
+	var fact *database.Fact
 
-func (dh FactDataHandler) GetRandomFact() (*types.Fact, error) {
-	itemCount, err := dh.Handler.GetItemCount()
+	factCount, err := fact.Count()
 	if err != nil {
 		return nil, err
 	}
 
-	if itemCount < 2 {
-		return nil, fmt.Errorf("collection needs to have at least two documents to get random item, collection has %d", itemCount)
-	}
+	log.Infof("total available facts in DB: %d", factCount)
 
-	log.Infof("Total available facts in DB: %d", itemCount)
+	randomId := rand.Int63n(factCount) + 1
 
-	randomId := rand.Int63n(itemCount) + 1
+	log.Infof("chosen random fact with id: %d", randomId)
 
-	log.Infof("Chosen random fact with id: %d", randomId)
-
-	item, err := dh.Handler.GetItem(fmt.Sprintf("%d", randomId))
+	fact.ID = uint(randomId)
+	err = fact.Read()
 	if err != nil {
 		return nil, err
 	}
-	return item, nil
+
+	return fact, nil
 }

@@ -2,14 +2,16 @@ version: '3.8'
 
 services:
 
-  animalfacts-mongodb:
-    image: mongo:6.0.3
-    container_name: animalfacts-mongodb
+  animalfacts-db:
+    image: postgres
+    container_name: animalfacts-db
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: animalfacts
-      MONGO_INITDB_ROOT_PASSWORD: animalfacts
+      POSTGRES_USER: animalfacts
+      POSTGRES_PASSWORD: animalfacts
+      POSTGRES_DB: animalfacts
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - '27017:27017'
+      - '5432:5432'
     volumes:
-      - /etc/animalfacts/db:/data/db
+      - /etc/animalfacts/db:/var/lib/postgresql/data

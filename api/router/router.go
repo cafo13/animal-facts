@@ -3,10 +3,11 @@ package router
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
+	"github.com/cafo13/animal-facts/api/database"
 	"github.com/cafo13/animal-facts/api/docs"
 	"github.com/cafo13/animal-facts/api/facts"
-	"github.com/cafo13/animal-facts/api/types"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -60,14 +61,14 @@ func (r Router) GetHealth(context *gin.Context) {
 // @Description Getting a random animal fact
 // @Tags facts
 // @Produce json
-// @Success 200 {object} types.Fact
+// @Success 200 {object} database.Fact
 // @Failure 500 {object} ErrorResponse
 // @Router /fact [get]
 func (r Router) GetRandomFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "GET")
 
-	var fact *types.Fact
+	var fact *database.Fact
 
 	fact, err := r.FactHandler.GetRandomFact()
 	if err != nil {
@@ -86,17 +87,24 @@ func (r Router) GetRandomFact(context *gin.Context) {
 // @Description Getting an animal fact by id
 // @Tags facts
 // @Produce json
-// @Success 200 {object} types.Fact
+// @Success 200 {object} database.Fact
 // @Failure 404 {object} ErrorResponse
 // @Router /fact/:id [get]
 func (r Router) GetFactById(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "GET")
 
-	var fact *types.Fact
+	var fact *database.Fact
 	id := context.Params.ByName("id")
+	uintId, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		wrappedError := errors.Wrap(err, fmt.Sprintf("error on parsing id %s", id))
+		log.Error(wrappedError)
+		context.JSON(http.StatusNotFound, gin.H{"Error": wrappedError.Error()})
+		return
+	}
 
-	fact, err := r.FactHandler.GetFactById(id)
+	fact, err = r.FactHandler.GetFactById(uint(uintId))
 	if err != nil {
 		wrappedError := errors.Wrap(err, fmt.Sprintf("error on getting fact by id %s", id))
 		log.Error(wrappedError)
@@ -113,9 +121,9 @@ func (r Router) GetFactById(context *gin.Context) {
 // @Description Adding an animal fact
 // @Tags facts
 // @Accept json
-// @Param request body types.Fact true "a new fact"
+// @Param request body database.Fact true "a new fact"
 // @Produce json
-// @Success 201 {object} types.Fact
+// @Success 201 {object} database.Fact
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /fact [post]
@@ -123,7 +131,7 @@ func (r Router) AddFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "POST")
 
-	var fact *types.Fact
+	var fact *database.Fact
 	err := context.BindJSON(&fact)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "error on getting fact from json body")
@@ -132,7 +140,7 @@ func (r Router) AddFact(context *gin.Context) {
 		return
 	}
 
-	err = r.FactHandler.AddFact(fact)
+	err = r.FactHandler.CreateFact(fact)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "error on adding new fact")
 		log.Error(wrappedError)
@@ -151,7 +159,7 @@ func (r Router) AddFact(context *gin.Context) {
 // @Accept json
 // @Param request body interface{} true "an updated fact"
 // @Produce json
-// @Success 200 {object} types.Fact
+// @Success 200 {object} database.Fact
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} MessageResponse
 // @Failure 500 {object} ErrorResponse
@@ -160,21 +168,25 @@ func (r Router) UpdateFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "PUT")
 
+	var fact *database.Fact
 	id := context.Params.ByName("id")
-	exists, err := r.FactHandler.FactExists(id)
+	uintId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
-		wrappedError := errors.Wrap(err, fmt.Sprintf("error on updating fact, error on checking, if fact with id %s exists", id))
+		wrappedError := errors.Wrap(err, fmt.Sprintf("error on parsing id %s", id))
 		log.Error(wrappedError)
-		context.JSON(http.StatusInternalServerError, gin.H{"Message": wrappedError.Error()})
+		context.JSON(http.StatusNotFound, gin.H{"Error": wrappedError.Error()})
 		return
-	} else if !exists {
+	}
+
+	fact.ID = uint(uintId)
+	err = fact.Read()
+	if err != nil {
 		errorMsg := fmt.Sprintf("error on updating fact, fact with id %s does not exists", id)
 		log.Error(errorMsg)
 		context.JSON(http.StatusNotFound, gin.H{"Message": errorMsg})
 		return
 	}
 
-	var fact *interface{}
 	err = context.BindJSON(&fact)
 
 	if err != nil {
@@ -184,7 +196,7 @@ func (r Router) UpdateFact(context *gin.Context) {
 		return
 	}
 
-	updatedFact, err := r.FactHandler.UpdateFact(id, fact)
+	updatedFact, err := r.FactHandler.UpdateFact(uint(uintId), fact)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "error on updating fact")
 		log.Error(wrappedError)
@@ -209,8 +221,15 @@ func (r Router) DeleteFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Methods", "DELETE")
 
 	id := context.Params.ByName("id")
+	uintId, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		wrappedError := errors.Wrap(err, fmt.Sprintf("error on parsing id %s", id))
+		log.Error(wrappedError)
+		context.JSON(http.StatusNotFound, gin.H{"Error": wrappedError.Error()})
+		return
+	}
 
-	err := r.FactHandler.DeleteFact(id)
+	err = r.FactHandler.DeleteFact(uint(uintId))
 	if err != nil {
 		wrappedError := errors.Wrap(err, fmt.Sprintf("error on deleting fact with id %s", id))
 		log.Error(wrappedError)
@@ -227,29 +246,17 @@ func (r Router) StartRouter(port string) {
 
 	v1 := r.Router.Group("/api/v1")
 	{
-		v1.GET("/health", func(c *gin.Context) {
-			r.GetHealth(c)
-		})
+		v1.GET("/health", r.GetHealth)
 
-		v1.GET("/fact", func(c *gin.Context) {
-			r.GetRandomFact(c)
-		})
+		v1.GET("/fact", r.GetRandomFact)
 
-		v1.GET("/fact/:id", func(c *gin.Context) {
-			r.GetFactById(c)
-		})
+		v1.GET("/fact/:id", r.GetFactById)
 
-		v1.POST("/fact", func(c *gin.Context) {
-			r.AddFact(c)
-		})
+		v1.POST("/fact", r.AddFact)
 
-		v1.PUT("/fact/:id", func(c *gin.Context) {
-			r.UpdateFact(c)
-		})
+		v1.PUT("/fact/:id", r.UpdateFact)
 
-		v1.DELETE("/fact/:id", func(c *gin.Context) {
-			r.DeleteFact(c)
-		})
+		v1.DELETE("/fact/:id", r.DeleteFact)
 	}
 
 	r.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
