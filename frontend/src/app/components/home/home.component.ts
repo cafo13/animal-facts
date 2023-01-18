@@ -1,11 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
 import { interval, Subscription } from 'rxjs'
 
-import {
-    AnimalfactsService,
-    Fact,
-    FactApiResponse
-} from 'src/app/services/animalfacts.service'
+import { AnimalfactsService, Fact } from 'src/app/services/animalfacts.service'
 
 @Component({
     selector: 'app-home',
@@ -16,7 +12,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     factRetentionSeconds = 30
     progressSub: Subscription | undefined = undefined
     progressValue: number = this.factRetentionSeconds
-    currentFact: Fact = { Id: '', Text: '', Category: '', Source: '' }
+    currentFact: Fact = { ID: '', text: '', category: '', source: '' }
 
     constructor(private animalfactsService: AnimalfactsService) {}
 
@@ -29,8 +25,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
 
     private loadFact() {
-        this.animalfactsService.getFact().subscribe((data: FactApiResponse) => {
-            this.currentFact = data.Fact
+        this.animalfactsService.getFact().subscribe((data: Fact) => {
+            this.currentFact = data
         })
     }
 

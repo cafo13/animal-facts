@@ -4,14 +4,10 @@ import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 
 export type Fact = {
-    Id: string
-    Text: string
-    Category: string
-    Source: string
-}
-
-export type FactApiResponse = {
-    Fact: Fact
+    ID: string
+    text: string
+    category: string
+    source: string
 }
 
 @Injectable({
@@ -22,12 +18,10 @@ export class AnimalfactsService {
 
     constructor(private http: HttpClient) {}
 
-    getFact(id?: string): Observable<FactApiResponse> {
+    getFact(id?: string): Observable<Fact> {
         if (id) {
-            return this.http.get<FactApiResponse>(
-                `${this.apiBaseDomain}/fact/${id}`
-            )
+            return this.http.get<Fact>(`${this.apiBaseDomain}/fact/${id}`)
         }
-        return this.http.get<FactApiResponse>(`${this.apiBaseDomain}/fact`)
+        return this.http.get<Fact>(`${this.apiBaseDomain}/fact`)
     }
 }
