@@ -1,6 +1,7 @@
 package facts
 
 import (
+	"errors"
 	"math/rand"
 
 	"github.com/cafo13/animal-facts/api/database"
@@ -25,6 +26,7 @@ func NewFactHandler(databaseHandler database.DatabaseHandler) FactHandler {
 }
 
 func (fdh FactDataHandler) CreateFact(fact *database.Fact) error {
+	fact.Database = *fdh.Handler.GetDatabase()
 	err := fact.Create()
 	if err != nil {
 		return err
@@ -36,6 +38,7 @@ func (fdh FactDataHandler) CreateFact(fact *database.Fact) error {
 func (fdh FactDataHandler) UpdateFact(id uint, updatedFact *database.Fact) (*database.Fact, error) {
 	fact := updatedFact
 	fact.ID = id
+	fact.Database = *fdh.Handler.GetDatabase()
 	err := fact.Update()
 	if err != nil {
 		return nil, err
@@ -45,8 +48,9 @@ func (fdh FactDataHandler) UpdateFact(id uint, updatedFact *database.Fact) (*dat
 }
 
 func (fdh FactDataHandler) DeleteFact(id uint) error {
-	var fact *database.Fact
+	fact := &database.Fact{}
 	fact.ID = id
+	fact.Database = *fdh.Handler.GetDatabase()
 	err := fact.Delete()
 	if err != nil {
 		return err
@@ -56,8 +60,9 @@ func (fdh FactDataHandler) DeleteFact(id uint) error {
 }
 
 func (fdh FactDataHandler) GetFactById(id uint) (*database.Fact, error) {
-	var fact *database.Fact
+	fact := &database.Fact{}
 	fact.ID = id
+	fact.Database = *fdh.Handler.GetDatabase()
 	err := fact.Read()
 	if err != nil {
 		return nil, err
@@ -67,14 +72,18 @@ func (fdh FactDataHandler) GetFactById(id uint) (*database.Fact, error) {
 }
 
 func (fdh FactDataHandler) GetRandomFact() (*database.Fact, error) {
-	var fact *database.Fact
-
+	fact := &database.Fact{}
+	fact.Database = *fdh.Handler.GetDatabase()
 	factCount, err := fact.Count()
 	if err != nil {
 		return nil, err
 	}
 
 	log.Infof("total available facts in DB: %d", factCount)
+
+	if factCount < 1 {
+		return nil, errors.New("no facts found, unable to select random fact")
+	}
 
 	randomId := rand.Int63n(factCount) + 1
 

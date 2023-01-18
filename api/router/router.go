@@ -68,8 +68,6 @@ func (r Router) GetRandomFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "GET")
 
-	var fact *database.Fact
-
 	fact, err := r.FactHandler.GetRandomFact()
 	if err != nil {
 		wrappedError := errors.Wrap(err, "error on getting random fact")
@@ -94,7 +92,6 @@ func (r Router) GetFactById(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "GET")
 
-	var fact *database.Fact
 	id := context.Params.ByName("id")
 	uintId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -104,7 +101,7 @@ func (r Router) GetFactById(context *gin.Context) {
 		return
 	}
 
-	fact, err = r.FactHandler.GetFactById(uint(uintId))
+	fact, err := r.FactHandler.GetFactById(uint(uintId))
 	if err != nil {
 		wrappedError := errors.Wrap(err, fmt.Sprintf("error on getting fact by id %s", id))
 		log.Error(wrappedError)
@@ -131,7 +128,7 @@ func (r Router) AddFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "POST")
 
-	var fact *database.Fact
+	fact := &database.Fact{}
 	err := context.BindJSON(&fact)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "error on getting fact from json body")
@@ -168,7 +165,6 @@ func (r Router) UpdateFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "PUT")
 
-	var fact *database.Fact
 	id := context.Params.ByName("id")
 	uintId, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
@@ -178,6 +174,7 @@ func (r Router) UpdateFact(context *gin.Context) {
 		return
 	}
 
+	fact := &database.Fact{}
 	fact.ID = uint(uintId)
 	err = fact.Read()
 	if err != nil {

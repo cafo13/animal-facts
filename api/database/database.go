@@ -8,7 +8,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type DatabaseHandler interface{}
+type DatabaseHandler interface {
+	GetDatabase() *Database
+}
 
 type Database struct {
 	db *gorm.DB
@@ -27,4 +29,8 @@ func NewDatabaseHandler(dbHost string, dbPort string, dbName string, dbUser stri
 	db.AutoMigrate(&Fact{})
 
 	return Database{db: db}, nil
+}
+
+func (db Database) GetDatabase() *Database {
+	return &db
 }

@@ -1,6 +1,10 @@
 package database
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type Fact struct {
 	Database
@@ -21,6 +25,7 @@ func (f *Fact) Create() error {
 }
 
 func (f *Fact) Read() error {
+	fmt.Printf("log 3 %+v %v", f, f.ID)
 	err := f.db.First(&f, f.ID).Error
 	if err != nil {
 		return err
