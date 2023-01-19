@@ -11,6 +11,8 @@ on:
     paths:
       - api/**
       - .github/workflows/api.yml
+      - go.work
+      - go.work.sum
 
 env:
   REGISTRY: ghcr.io
@@ -25,7 +27,7 @@ jobs:
       - name: Check out Code
         uses: actions/checkout@v3
       - name: install dependencies
-        run: go mod download && go mod verify
+        run: go mod download
         working-directory: ./api
       - name: run tests
         run: go test ./...
