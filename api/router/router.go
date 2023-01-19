@@ -174,9 +174,7 @@ func (r Router) UpdateFact(context *gin.Context) {
 		return
 	}
 
-	fact := &database.Fact{}
-	fact.ID = uint(uintId)
-	err = fact.Read()
+	_, err = r.FactHandler.GetFactById(uint(uintId))
 	if err != nil {
 		errorMsg := fmt.Sprintf("error on updating fact, fact with id %s does not exists", id)
 		log.Error(errorMsg)
@@ -184,8 +182,8 @@ func (r Router) UpdateFact(context *gin.Context) {
 		return
 	}
 
+	var fact *database.Fact
 	err = context.BindJSON(&fact)
-
 	if err != nil {
 		wrappedError := errors.Wrap(err, "error on getting fact from json body")
 		log.Error(wrappedError)

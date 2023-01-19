@@ -1,12 +1,8 @@
 package facts
 
 import (
-	"errors"
-	"math/rand"
-
 	"github.com/cafo13/animal-facts/api/database"
-
-	log "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 )
 
 type FactHandler interface {
@@ -74,22 +70,12 @@ func (fdh FactDataHandler) GetFactById(id uint) (*database.Fact, error) {
 func (fdh FactDataHandler) GetRandomFact() (*database.Fact, error) {
 	fact := &database.Fact{}
 	fact.Database = *fdh.Handler.GetDatabase()
-	factCount, err := fact.Count()
+	factId, err := fact.GetRandomFactId()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get random fact id")
 	}
 
-	log.Infof("total available facts in DB: %d", factCount)
-
-	if factCount < 1 {
-		return nil, errors.New("no facts found, unable to select random fact")
-	}
-
-	randomId := rand.Int63n(factCount) + 1
-
-	log.Infof("chosen random fact with id: %d", randomId)
-
-	fact.ID = uint(randomId)
+	fact.ID = uint(factId)
 	err = fact.Read()
 	if err != nil {
 		return nil, err

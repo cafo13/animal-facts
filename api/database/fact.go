@@ -1,18 +1,23 @@
 package database
 
 import (
-	"fmt"
+	"math/rand"
 
+	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
 type Fact struct {
 	Database
 	gorm.Model
-	Text     string `json:"text"`
-	Category string `json:"category"`
-	Source   string `json:"source"`
-	Approved bool   `json:"approved"`
+	Text     string `json:"Text,omitempty"`
+	Category string `json:"Category,omitempty"`
+	Source   string `json:"Source,omitempty"`
+	Approved bool   `json:"Approved,omitempty"`
+}
+
+type FactId struct {
+	ID uint `gorm:"primarykey"`
 }
 
 func (f *Fact) Create() error {
@@ -25,7 +30,6 @@ func (f *Fact) Create() error {
 }
 
 func (f *Fact) Read() error {
-	fmt.Printf("log 3 %+v %v", f, f.ID)
 	err := f.db.First(&f, f.ID).Error
 	if err != nil {
 		return err
@@ -52,12 +56,19 @@ func (f *Fact) Delete() error {
 	return nil
 }
 
-func (f *Fact) Count() (int64, error) {
-	var count int64
-	err := f.db.Model(&Fact{}).Count(&count).Error
+func (f *Fact) GetRandomFactId() (uint, error) {
+	factIds := []FactId{}
+	err := f.db.Model(&Fact{}).Where("deleted_at IS NULL").Find(&factIds).Error
 	if err != nil {
-		return count, err
+		return 0, errors.Wrap(err, "failed to get all fact Ids")
 	}
 
-	return count, nil
+	factCount := len(factIds)
+	if factCount < 1 {
+		return 0, errors.New("no facts found, unable to select random fact")
+	}
+
+	factId := factIds[rand.Intn(factCount)]
+
+	return factId.ID, nil
 }
