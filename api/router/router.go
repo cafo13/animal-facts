@@ -106,7 +106,7 @@ func (r Router) CurrentUser(context *gin.Context) {
 		return
 	}
 
-	u, err := r.AuthHandler.GetUserByID(userId)
+	u, err := r.AuthHandler.GetUserById(userId)
 
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
