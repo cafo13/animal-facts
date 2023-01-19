@@ -28,13 +28,3 @@ func (u *User) CheckLogin() error {
 
 	return nil
 }
-
-func (u *User) GetById() error {
-	if err := u.Database.db.First(&u, u.ID).Error; err != nil {
-		return errors.New("user not found")
-	}
-
-	u.Password = ""
-
-	return nil
-}

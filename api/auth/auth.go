@@ -12,7 +12,6 @@ import (
 type AuthHandler interface {
 	VerifyLogin(username string, password string) (string, error)
 	GenerateToken(userId uint) (string, error)
-	GetUserById(uid uint) (*database.User, error)
 }
 
 type AuthDataHandler struct {
@@ -54,16 +53,4 @@ func (adh AuthDataHandler) GenerateToken(userId uint) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte(os.Getenv("API_SECRET")))
-}
-
-func (adh AuthDataHandler) GetUserById(uid uint) (*database.User, error) {
-	var user *database.User
-	user.Database = *adh.Handler.GetDatabase()
-	user.ID = uid
-	err := user.GetById()
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
 }

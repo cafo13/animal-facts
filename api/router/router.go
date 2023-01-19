@@ -92,30 +92,6 @@ func (r Router) Login(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"token": token})
 }
 
-// @Summary Get current user
-// @Schemes https
-// @Description Get current logged in user
-// @Tags general
-// @Produce json
-// @Success 200 {object}
-// @Router /user [get]
-func (r Router) CurrentUser(context *gin.Context) {
-	userId, err := auth.ExtractTokenID(context)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	u, err := r.AuthHandler.GetUserById(userId)
-
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	context.JSON(http.StatusOK, gin.H{"message": "success", "data": u})
-}
-
 // @Summary Get random animal fact
 // @Schemes https
 // @Description Getting a random animal fact
@@ -304,8 +280,6 @@ func (r Router) StartRouter(port string) {
 		v1.GET("/health", r.GetHealth)
 
 		v1.POST("/login", r.Login)
-
-		v1.GET("/user", auth.JwtAuthMiddleware(), r.CurrentUser)
 
 		v1.GET("/fact", r.GetRandomFact)
 
