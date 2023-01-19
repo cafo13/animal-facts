@@ -21,7 +21,7 @@ type FactId struct {
 }
 
 func (f *Fact) Create() error {
-	err := f.db.Create(&f).Error
+	err := f.Database.db.Create(&f).Error
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (f *Fact) Create() error {
 }
 
 func (f *Fact) Read() error {
-	err := f.db.First(&f, f.ID).Error
+	err := f.Database.db.First(&f, f.ID).Error
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (f *Fact) Read() error {
 }
 
 func (f *Fact) Update() error {
-	err := f.db.Updates(&f).Error
+	err := f.Database.db.Updates(&f).Error
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func (f *Fact) Update() error {
 }
 
 func (f *Fact) Delete() error {
-	err := f.db.Delete(&f).Error
+	err := f.Database.db.Delete(&f).Error
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (f *Fact) Delete() error {
 
 func (f *Fact) GetRandomFactId() (uint, error) {
 	factIds := []FactId{}
-	err := f.db.Model(&Fact{}).Where("deleted_at IS NULL").Find(&factIds).Error
+	err := f.Database.db.Model(&Fact{}).Where("deleted_at IS NULL").Find(&factIds).Error
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to get all fact Ids")
 	}

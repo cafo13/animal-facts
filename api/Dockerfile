@@ -1,6 +1,7 @@
 FROM golang:1.19.4
 
 ENV GIN_MODE: "release"
+ENV TOKEN_HOUR_LIFESPAN "1"
 
 WORKDIR /animalfacts
 

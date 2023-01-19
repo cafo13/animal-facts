@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/cafo13/animal-facts/api/auth"
 	"github.com/cafo13/animal-facts/api/database"
 	"github.com/cafo13/animal-facts/api/docs"
 	"github.com/cafo13/animal-facts/api/facts"
@@ -28,6 +29,7 @@ type GinRouter interface {
 
 type Router struct {
 	Router      *gin.Engine
+	AuthHandler auth.AuthHandler
 	FactHandler facts.FactHandler
 }
 
@@ -39,8 +41,13 @@ type ErrorResponse struct {
 	Error error
 }
 
-func NewRouter(factHandler facts.FactHandler) GinRouter {
-	return Router{Router: gin.Default(), FactHandler: factHandler}
+type LoginInput struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+func NewRouter(authHandler auth.AuthHandler, factHandler facts.FactHandler) GinRouter {
+	return Router{Router: gin.Default(), AuthHandler: authHandler, FactHandler: factHandler}
 }
 
 // @Summary Get health status
@@ -54,6 +61,59 @@ func (r Router) GetHealth(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "GET")
 	context.String(http.StatusOK, "healthy\n")
+}
+
+// @Summary Login endpoint
+// @Schemes https
+// @Description Login endpoint for the endpoints of the API, that require auth
+// @Tags general
+// @Produce json
+// @Success 200 {object}
+// @Router /login [post]
+func (r Router) Login(context *gin.Context) {
+	var input LoginInput
+
+	if err := context.ShouldBindJSON(&input); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": errors.Wrap(err, "invalid request format, needs username and password jso keys").Error()})
+		return
+	}
+
+	u := database.User{}
+
+	u.Username = input.Username
+	u.Password = input.Password
+
+	token, err := r.AuthHandler.VerifyLogin(u.Username, u.Password)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+// @Summary Get current user
+// @Schemes https
+// @Description Get current logged in user
+// @Tags general
+// @Produce json
+// @Success 200 {object}
+// @Router /user [get]
+func (r Router) CurrentUser(context *gin.Context) {
+	userId, err := auth.ExtractTokenID(context)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	u, err := r.AuthHandler.GetUserByID(userId)
+
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "success", "data": u})
 }
 
 // @Summary Get random animal fact
@@ -243,15 +303,19 @@ func (r Router) StartRouter(port string) {
 	{
 		v1.GET("/health", r.GetHealth)
 
+		v1.POST("/login", r.Login)
+
+		v1.GET("/user", auth.JwtAuthMiddleware(), r.CurrentUser)
+
 		v1.GET("/fact", r.GetRandomFact)
 
 		v1.GET("/fact/:id", r.GetFactById)
 
-		v1.POST("/fact", r.AddFact)
+		v1.POST("/fact", auth.JwtAuthMiddleware(), r.AddFact)
 
-		v1.PUT("/fact/:id", r.UpdateFact)
+		v1.PUT("/fact/:id", auth.JwtAuthMiddleware(), r.UpdateFact)
 
-		v1.DELETE("/fact/:id", r.DeleteFact)
+		v1.DELETE("/fact/:id", auth.JwtAuthMiddleware(), r.DeleteFact)
 	}
 
 	r.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

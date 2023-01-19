@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/cafo13/animal-facts/api/auth"
 	"github.com/cafo13/animal-facts/api/database"
 	"github.com/cafo13/animal-facts/api/facts"
 	"github.com/cafo13/animal-facts/api/router"
@@ -30,13 +31,18 @@ func setupDatabaseHandler(dbHost string, dbPort string, dbName string, dbUser st
 	return &databaseHandler, nil
 }
 
+func setupAuthHandler(databaseHandler *database.DatabaseHandler) *auth.AuthHandler {
+	authHandler := auth.NewAuthHandler(*databaseHandler)
+	return &authHandler
+}
+
 func setupFactHandler(databaseHandler *database.DatabaseHandler) *facts.FactHandler {
 	factHandler := facts.NewFactHandler(*databaseHandler)
 	return &factHandler
 }
 
-func setupRouter(factHandler *facts.FactHandler) router.GinRouter {
-	router := router.NewRouter(*factHandler)
+func setupRouter(authHandler *auth.AuthHandler, factHandler *facts.FactHandler) router.GinRouter {
+	router := router.NewRouter(*authHandler, *factHandler)
 	return router
 }
 
@@ -67,8 +73,9 @@ func main() {
 		log.Fatal("failed to setup database handler", err)
 	}
 
+	authHandler := setupAuthHandler(databaseHandler)
 	factHandler := setupFactHandler(databaseHandler)
-	router := setupRouter(factHandler)
+	router := setupRouter(authHandler, factHandler)
 
 	router.StartRouter(apiPort)
 }

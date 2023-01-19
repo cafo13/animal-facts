@@ -2,6 +2,7 @@ package facts
 
 import (
 	"github.com/cafo13/animal-facts/api/database"
+
 	"github.com/pkg/errors"
 )
 

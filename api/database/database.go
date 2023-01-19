@@ -26,7 +26,7 @@ func NewDatabaseHandler(dbHost string, dbPort string, dbName string, dbUser stri
 		log.Info("successfully connected to database")
 	}
 
-	db.AutoMigrate(&Fact{})
+	db.AutoMigrate(&User{}, &Fact{})
 
 	return Database{db: db}, nil
 }
