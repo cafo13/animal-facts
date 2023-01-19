@@ -44,4 +44,4 @@ jobs:
       - name: Check out Code
         uses: actions/checkout@v3
       - name: build cli
-        run: echo "[TODO] cli tool will be built here...""
+        run: echo "[TODO] cli tool will be built here..."
