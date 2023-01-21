@@ -2,19 +2,20 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 
 import { Observable } from 'rxjs'
+import { environment } from 'src/environment/environment'
 
 export type Fact = {
     ID: string
-    text: string
-    category: string
-    source: string
+    Text: string
+    Category: string
+    Source: string
 }
 
 @Injectable({
     providedIn: 'root'
 })
 export class AnimalfactsService {
-    apiBaseDomain = 'http://localhost:8080/api/v1'
+    apiBaseDomain = environment.apiEndpoint
 
     constructor(private http: HttpClient) {}
 
