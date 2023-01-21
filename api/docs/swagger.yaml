@@ -1,25 +1,44 @@
 basePath: /api/v1
 definitions:
+  database.Fact:
+    properties:
+      Approved:
+        type: boolean
+      Category:
+        type: string
+      Source:
+        type: string
+      Text:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
   router.ErrorResponse:
     properties:
       error: {}
     type: object
+  router.LoginResponse:
+    properties:
+      token:
+        type: string
+    type: object
   router.MessageResponse:
     properties:
       message:
-        type: string
-    type: object
-  types.Fact:
-    properties:
-      approved:
-        type: boolean
-      category:
-        type: string
-      id:
-        type: string
-      source:
-        type: string
-      text:
         type: string
     type: object
 host: https://animalfacts.app
@@ -43,7 +62,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/types.Fact'
+            $ref: '#/definitions/database.Fact'
         "500":
           description: Internal Server Error
           schema:
@@ -61,14 +80,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/types.Fact'
+          $ref: '#/definitions/database.Fact'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/types.Fact'
+            $ref: '#/definitions/database.Fact'
         "400":
           description: Bad Request
           schema:
@@ -105,7 +124,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/types.Fact'
+            $ref: '#/definitions/database.Fact'
         "404":
           description: Not Found
           schema:
@@ -130,7 +149,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/types.Fact'
+            $ref: '#/definitions/database.Fact'
         "400":
           description: Bad Request
           schema:
@@ -157,6 +176,19 @@ paths:
           schema:
             type: string
       summary: Get health status
+      tags:
+      - general
+  /login:
+    post:
+      description: Login endpoint for the endpoints of the API, that require auth
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/router.LoginResponse'
+      summary: Login endpoint
       tags:
       - general
 swagger: "2.0"

@@ -30,7 +30,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/types.Fact"
+                            "$ref": "#/definitions/database.Fact"
                         }
                     },
                     "500": {
@@ -60,7 +60,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.Fact"
+                            "$ref": "#/definitions/database.Fact"
                         }
                     }
                 ],
@@ -68,7 +68,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/types.Fact"
+                            "$ref": "#/definitions/database.Fact"
                         }
                     },
                     "400": {
@@ -100,7 +100,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/types.Fact"
+                            "$ref": "#/definitions/database.Fact"
                         }
                     },
                     "404": {
@@ -138,7 +138,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/types.Fact"
+                            "$ref": "#/definitions/database.Fact"
                         }
                     },
                     "400": {
@@ -205,39 +205,88 @@
                     }
                 }
             }
+        },
+        "/login": {
+            "post": {
+                "description": "Login endpoint for the endpoints of the API, that require auth",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "general"
+                ],
+                "summary": "Login endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/router.LoginResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "database.Fact": {
+            "type": "object",
+            "properties": {
+                "Approved": {
+                    "type": "boolean"
+                },
+                "Category": {
+                    "type": "string"
+                },
+                "Source": {
+                    "type": "string"
+                },
+                "Text": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "gorm.DeletedAt": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
         "router.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {}
             }
         },
-        "router.MessageResponse": {
+        "router.LoginResponse": {
             "type": "object",
             "properties": {
-                "message": {
+                "token": {
                     "type": "string"
                 }
             }
         },
-        "types.Fact": {
+        "router.MessageResponse": {
             "type": "object",
             "properties": {
-                "approved": {
-                    "type": "boolean"
-                },
-                "category": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "source": {
-                    "type": "string"
-                },
-                "text": {
+                "message": {
                     "type": "string"
                 }
             }

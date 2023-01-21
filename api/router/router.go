@@ -41,6 +41,10 @@ type ErrorResponse struct {
 	Error error
 }
 
+type LoginResponse struct {
+	Token string `json:"token"`
+}
+
 type LoginInput struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -68,7 +72,7 @@ func (r Router) GetHealth(context *gin.Context) {
 // @Description Login endpoint for the endpoints of the API, that require auth
 // @Tags general
 // @Produce json
-// @Success 200 {object}
+// @Success 200 {object} LoginResponse
 // @Router /login [post]
 func (r Router) Login(context *gin.Context) {
 	var input LoginInput
@@ -290,9 +294,9 @@ func (r Router) StartRouter(port string) {
 		v1.PUT("/fact/:id", auth.JwtAuthMiddleware(), r.UpdateFact)
 
 		v1.DELETE("/fact/:id", auth.JwtAuthMiddleware(), r.DeleteFact)
-	}
 
-	r.Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
 
 	r.Router.Run(":" + port)
 }
