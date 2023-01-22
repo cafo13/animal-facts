@@ -65,7 +65,7 @@ func main() {
 	pgPort := getEnvVar("DB_PORT", "5432")
 	pgDatabase := getEnvVar("DB_NAME", "animalfacts")
 	pgUsername := getEnvVar("DB_USERNAME", "animalfacts")
-	pgPassword := getEnvVar("DB_PASSWOD", "animalfacts")
+	pgPassword := getEnvVar("DB_PASSWORD", "animalfacts")
 	apiPort := getEnvVar("API_PORT", "8080")
 
 	databaseHandler, err := setupDatabaseHandler(pgHost, pgPort, pgDatabase, pgUsername, pgPassword)
