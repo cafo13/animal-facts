@@ -10,13 +10,15 @@ import { AppComponent } from './app.component'
 import { HomeComponent } from './components/home/home.component'
 import { FactComponent } from './components/fact/fact.component'
 import { FactControlsComponent } from './components/fact-controls/fact-controls.component'
+import { FooterComponent } from './components/footer/footer.component'
 
 @NgModule({
     declarations: [
         AppComponent,
         HomeComponent,
         FactComponent,
-        FactControlsComponent
+        FactControlsComponent,
+        FooterComponent
     ],
     imports: [
         BrowserModule,
