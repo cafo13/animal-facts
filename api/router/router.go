@@ -7,14 +7,11 @@ import (
 
 	"github.com/cafo13/animal-facts/api/auth"
 	"github.com/cafo13/animal-facts/api/database"
-	"github.com/cafo13/animal-facts/api/docs"
 	"github.com/cafo13/animal-facts/api/facts"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type GinRouter interface {
@@ -277,8 +274,6 @@ func (r Router) DeleteFact(context *gin.Context) {
 }
 
 func (r Router) StartRouter(port string) {
-	docs.SwaggerInfo.BasePath = "/api/v1"
-
 	v1 := r.Router.Group("/api/v1")
 	{
 		v1.GET("/health", r.GetHealth)
@@ -294,8 +289,6 @@ func (r Router) StartRouter(port string) {
 		v1.PUT("/fact/:id", auth.JwtAuthMiddleware(), r.UpdateFact)
 
 		v1.DELETE("/fact/:id", auth.JwtAuthMiddleware(), r.DeleteFact)
-
-		v1.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 
 	r.Router.Run(":" + port)
