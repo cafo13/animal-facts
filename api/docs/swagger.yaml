@@ -1,42 +1,24 @@
 basePath: /api/v1
 definitions:
-  database.Fact:
+  models.ErrorResponse:
     properties:
-      Approved:
-        type: boolean
+      error: {}
+    type: object
+  models.Fact:
+    properties:
       Category:
         type: string
       Source:
         type: string
       Text:
         type: string
-      createdAt:
-        type: string
-      deletedAt:
-        $ref: '#/definitions/gorm.DeletedAt'
-      id:
-        type: integer
-      updatedAt:
-        type: string
     type: object
-  gorm.DeletedAt:
-    properties:
-      time:
-        type: string
-      valid:
-        description: Valid is true if Time is not NULL
-        type: boolean
-    type: object
-  router.ErrorResponse:
-    properties:
-      error: {}
-    type: object
-  router.LoginResponse:
+  models.LoginResponse:
     properties:
       token:
         type: string
     type: object
-  router.MessageResponse:
+  models.MessageResponse:
     properties:
       message:
         type: string
@@ -44,6 +26,7 @@ definitions:
 host: https://animalfacts.app
 info:
   contact:
+    email: support@animalfacts.app
     name: Animal Facts API
     url: https://animalfacts.app
   description: Awesome facts about animals.
@@ -62,11 +45,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/database.Fact'
+            $ref: '#/definitions/models.Fact'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/router.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Get random animal fact
       tags:
       - facts
@@ -80,22 +63,22 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/database.Fact'
+          $ref: '#/definitions/models.Fact'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/database.Fact'
+            $ref: '#/definitions/models.Fact'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/router.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/router.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Add a new animal fact
       tags:
       - facts
@@ -108,11 +91,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/router.MessageResponse'
+            $ref: '#/definitions/models.MessageResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/router.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Delete an animal fact
       tags:
       - facts
@@ -124,11 +107,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/database.Fact'
+            $ref: '#/definitions/models.Fact'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/router.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Get animal fact by id
       tags:
       - facts
@@ -149,19 +132,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/database.Fact'
+            $ref: '#/definitions/models.Fact'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/router.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/router.MessageResponse'
+            $ref: '#/definitions/models.MessageResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/router.ErrorResponse'
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Update an existing animal fact
       tags:
       - facts
@@ -187,7 +170,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/router.LoginResponse'
+            $ref: '#/definitions/models.LoginResponse'
       summary: Login endpoint
       tags:
       - general

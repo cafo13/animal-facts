@@ -5,7 +5,8 @@
         "title": "Animal Facts API",
         "contact": {
             "name": "Animal Facts API",
-            "url": "https://animalfacts.app"
+            "url": "https://animalfacts.app",
+            "email": "support@animalfacts.app"
         },
         "license": {
             "name": "MIT",
@@ -30,13 +31,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/database.Fact"
+                            "$ref": "#/definitions/models.Fact"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/router.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -60,7 +61,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/database.Fact"
+                            "$ref": "#/definitions/models.Fact"
                         }
                     }
                 ],
@@ -68,19 +69,19 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/database.Fact"
+                            "$ref": "#/definitions/models.Fact"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/router.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/router.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -100,13 +101,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/database.Fact"
+                            "$ref": "#/definitions/models.Fact"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/router.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -138,25 +139,25 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/database.Fact"
+                            "$ref": "#/definitions/models.Fact"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/router.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/router.MessageResponse"
+                            "$ref": "#/definitions/models.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/router.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -174,13 +175,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/router.MessageResponse"
+                            "$ref": "#/definitions/models.MessageResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/router.ErrorResponse"
+                            "$ref": "#/definitions/models.ErrorResponse"
                         }
                     }
                 }
@@ -220,7 +221,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/router.LoginResponse"
+                            "$ref": "#/definitions/models.LoginResponse"
                         }
                     }
                 }
@@ -228,12 +229,15 @@
         }
     },
     "definitions": {
-        "database.Fact": {
+        "models.ErrorResponse": {
             "type": "object",
             "properties": {
-                "Approved": {
-                    "type": "boolean"
-                },
+                "error": {}
+            }
+        },
+        "models.Fact": {
+            "type": "object",
+            "properties": {
                 "Category": {
                     "type": "string"
                 },
@@ -242,40 +246,10 @@
                 },
                 "Text": {
                     "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "$ref": "#/definitions/gorm.DeletedAt"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "updatedAt": {
-                    "type": "string"
                 }
             }
         },
-        "gorm.DeletedAt": {
-            "type": "object",
-            "properties": {
-                "time": {
-                    "type": "string"
-                },
-                "valid": {
-                    "description": "Valid is true if Time is not NULL",
-                    "type": "boolean"
-                }
-            }
-        },
-        "router.ErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {}
-            }
-        },
-        "router.LoginResponse": {
+        "models.LoginResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -283,7 +257,7 @@
                 }
             }
         },
-        "router.MessageResponse": {
+        "models.MessageResponse": {
             "type": "object",
             "properties": {
                 "message": {

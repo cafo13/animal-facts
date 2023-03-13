@@ -8,6 +8,7 @@ import (
 	"github.com/cafo13/animal-facts/api/auth"
 	"github.com/cafo13/animal-facts/api/database"
 	"github.com/cafo13/animal-facts/api/facts"
+	"github.com/cafo13/animal-facts/api/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -28,23 +29,6 @@ type Router struct {
 	Router      *gin.Engine
 	AuthHandler auth.AuthHandler
 	FactHandler facts.FactHandler
-}
-
-type MessageResponse struct {
-	Message string
-}
-
-type ErrorResponse struct {
-	Error error
-}
-
-type LoginResponse struct {
-	Token string `json:"token"`
-}
-
-type LoginInput struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
 }
 
 func NewRouter(authHandler auth.AuthHandler, factHandler facts.FactHandler) GinRouter {
@@ -69,10 +53,10 @@ func (r Router) GetHealth(context *gin.Context) {
 // @Description Login endpoint for the endpoints of the API, that require auth
 // @Tags general
 // @Produce json
-// @Success 200 {object} LoginResponse
+// @Success 200 {object} models.LoginResponse
 // @Router /login [post]
 func (r Router) Login(context *gin.Context) {
-	var input LoginInput
+	var input models.LoginInput
 
 	if err := context.ShouldBindJSON(&input); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": errors.Wrap(err, "invalid request format, needs username and password jso keys").Error()})
@@ -98,8 +82,8 @@ func (r Router) Login(context *gin.Context) {
 // @Description Getting a random animal fact
 // @Tags facts
 // @Produce json
-// @Success 200 {object} database.Fact
-// @Failure 500 {object} ErrorResponse
+// @Success 200 {object} models.Fact
+// @Failure 500 {object} models.ErrorResponse
 // @Router /fact [get]
 func (r Router) GetRandomFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
@@ -122,8 +106,8 @@ func (r Router) GetRandomFact(context *gin.Context) {
 // @Description Getting an animal fact by id
 // @Tags facts
 // @Produce json
-// @Success 200 {object} database.Fact
-// @Failure 404 {object} ErrorResponse
+// @Success 200 {object} models.Fact
+// @Failure 404 {object} models.ErrorResponse
 // @Router /fact/:id [get]
 func (r Router) GetFactById(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
@@ -155,17 +139,17 @@ func (r Router) GetFactById(context *gin.Context) {
 // @Description Adding an animal fact
 // @Tags facts
 // @Accept json
-// @Param request body database.Fact true "a new fact"
+// @Param request body models.Fact true "a new fact"
 // @Produce json
-// @Success 201 {object} database.Fact
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
+// @Success 201 {object} models.Fact
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} models.ErrorResponse
 // @Router /fact [post]
 func (r Router) AddFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
 	context.Header("Access-Control-Allow-Methods", "POST")
 
-	fact := &database.Fact{}
+	fact := &models.Fact{}
 	err := context.BindJSON(&fact)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "error on getting fact from json body")
@@ -193,10 +177,10 @@ func (r Router) AddFact(context *gin.Context) {
 // @Accept json
 // @Param request body interface{} true "an updated fact"
 // @Produce json
-// @Success 200 {object} database.Fact
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} MessageResponse
-// @Failure 500 {object} ErrorResponse
+// @Success 200 {object} models.Fact
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 404 {object} models.MessageResponse
+// @Failure 500 {object} models.ErrorResponse
 // @Router /fact/:id [put]
 func (r Router) UpdateFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")
@@ -219,7 +203,7 @@ func (r Router) UpdateFact(context *gin.Context) {
 		return
 	}
 
-	var fact *database.Fact
+	var fact *models.Fact
 	err = context.BindJSON(&fact)
 	if err != nil {
 		wrappedError := errors.Wrap(err, "error on getting fact from json body")
@@ -245,8 +229,8 @@ func (r Router) UpdateFact(context *gin.Context) {
 // @Description Deleting an animal fact
 // @Tags facts
 // @Produce json
-// @Success 200 {object} MessageResponse
-// @Failure 500 {object} ErrorResponse
+// @Success 200 {object} models.MessageResponse
+// @Failure 500 {object} models.ErrorResponse
 // @Router /fact/:id [delete]
 func (r Router) DeleteFact(context *gin.Context) {
 	context.Header("Access-Control-Allow-Origin", "*")

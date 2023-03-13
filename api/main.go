@@ -52,6 +52,7 @@ func setupRouter(authHandler *auth.AuthHandler, factHandler *facts.FactHandler) 
 
 // @contact.name   Animal Facts API
 // @contact.url    https://animalfacts.app
+// @contact.email  support@animalfacts.app
 
 // @license.name  MIT
 // @license.url   https://github.com/cafo13/animal-facts/blob/main/LICENSE

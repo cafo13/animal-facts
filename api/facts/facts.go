@@ -2,16 +2,19 @@ package facts
 
 import (
 	"github.com/cafo13/animal-facts/api/database"
+	"github.com/cafo13/animal-facts/api/models"
 
 	"github.com/pkg/errors"
 )
 
 type FactHandler interface {
-	CreateFact(fact *database.Fact) error
+	CreateFact(fact *models.Fact) error
+	DatabaseFactToModelsFactWithID(dbFact *database.Fact) *models.FactWithID
 	DeleteFact(id uint) error
-	GetFactById(id uint) (*database.Fact, error)
-	GetRandomFact() (*database.Fact, error)
-	UpdateFact(id uint, fact *database.Fact) (*database.Fact, error)
+	GetFactById(id uint) (*models.FactWithID, error)
+	GetRandomFact() (*models.FactWithID, error)
+	ModelsFactToDatabaseFact(fact *models.Fact) *database.Fact
+	UpdateFact(id uint, updatedFact *models.Fact) (*models.FactWithID, error)
 }
 
 type FactDataHandler struct {
@@ -22,9 +25,9 @@ func NewFactHandler(databaseHandler database.DatabaseHandler) FactHandler {
 	return FactDataHandler{Handler: databaseHandler}
 }
 
-func (fdh FactDataHandler) CreateFact(fact *database.Fact) error {
-	fact.Database = *fdh.Handler.GetDatabase()
-	err := fact.Create()
+func (fdh FactDataHandler) CreateFact(fact *models.Fact) error {
+	dbFact := fdh.ModelsFactToDatabaseFact(fact)
+	err := dbFact.Create()
 	if err != nil {
 		return err
 	}
@@ -32,16 +35,14 @@ func (fdh FactDataHandler) CreateFact(fact *database.Fact) error {
 	return nil
 }
 
-func (fdh FactDataHandler) UpdateFact(id uint, updatedFact *database.Fact) (*database.Fact, error) {
-	fact := updatedFact
-	fact.ID = id
-	fact.Database = *fdh.Handler.GetDatabase()
-	err := fact.Update()
-	if err != nil {
-		return nil, err
-	}
+func (fdh FactDataHandler) DatabaseFactToModelsFactWithID(dbFact *database.Fact) *models.FactWithID {
+	fact := &models.FactWithID{}
+	fact.ID = dbFact.ID
+	fact.Text = dbFact.Text
+	fact.Category = dbFact.Category
+	fact.Source = dbFact.Source
 
-	return fact, nil
+	return fact
 }
 
 func (fdh FactDataHandler) DeleteFact(id uint) error {
@@ -56,28 +57,54 @@ func (fdh FactDataHandler) DeleteFact(id uint) error {
 	return nil
 }
 
-func (fdh FactDataHandler) GetFactById(id uint) (*database.Fact, error) {
-	fact := &database.Fact{}
-	fact.ID = id
-	fact.Database = *fdh.Handler.GetDatabase()
-	err := fact.Read()
+func (fdh FactDataHandler) GetFactById(id uint) (*models.FactWithID, error) {
+	dbFact := &database.Fact{}
+	dbFact.ID = id
+	dbFact.Database = *fdh.Handler.GetDatabase()
+	err := dbFact.Read()
 	if err != nil {
 		return nil, err
 	}
 
-	return fact, nil
+	return fdh.DatabaseFactToModelsFactWithID(dbFact), nil
 }
 
-func (fdh FactDataHandler) GetRandomFact() (*database.Fact, error) {
-	fact := &database.Fact{}
-	fact.Database = *fdh.Handler.GetDatabase()
-	factId, err := fact.GetRandomFactId()
+func (fdh FactDataHandler) GetRandomFact() (*models.FactWithID, error) {
+	dbFact := &database.Fact{}
+	dbFact.Database = *fdh.Handler.GetDatabase()
+	factId, err := dbFact.GetRandomFactId()
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get random fact id")
 	}
 
-	fact.ID = uint(factId)
-	err = fact.Read()
+	dbFact.ID = uint(factId)
+	err = dbFact.Read()
+	if err != nil {
+		return nil, err
+	}
+
+	return fdh.DatabaseFactToModelsFactWithID(dbFact), nil
+}
+
+func (fdh FactDataHandler) ModelsFactToDatabaseFact(fact *models.Fact) *database.Fact {
+	dbFact := &database.Fact{}
+	dbFact.Database = *fdh.Handler.GetDatabase()
+	dbFact.Text = fact.Text
+	dbFact.Category = fact.Category
+	dbFact.Source = fact.Source
+
+	return dbFact
+}
+
+func (fdh FactDataHandler) UpdateFact(id uint, updatedFact *models.Fact) (*models.FactWithID, error) {
+	dbFact := fdh.ModelsFactToDatabaseFact(updatedFact)
+	dbFact.ID = id
+	err := dbFact.Update()
+	if err != nil {
+		return nil, err
+	}
+
+	fact, err := fdh.GetFactById(dbFact.ID)
 	if err != nil {
 		return nil, err
 	}
