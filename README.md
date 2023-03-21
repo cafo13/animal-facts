@@ -5,7 +5,7 @@
 
 This projects is about awesome facts about animals and make more people know these.
 
-The core is an [API](./api/) written in Golang that provides the animal facts. In the background there is a PostgreSQL database for storing the facts data. Additionally there is a [angular frontend](./frontend/), that is used as a showcase for the API and also handling requests for new facts or updates of existing facts. And for the CLI users there is an [animal-facts-cli](./cli/), that uses the API in the background.
+The core is an [API](./api/) written in Golang that provides the animal facts. In the background there is a PostgreSQL database for storing the facts data. Additionally there is a [vue.js frontend](./frontend/), that is used as a showcase for the API and also handling requests for new facts or updates of existing facts. And for the CLI users there is an [animal-facts-cli](./cli/), that uses the API in the background.
 
 Feel free to visit [animalfacts.app](https://animalfacts.app) to see the latest version of the project in action!
 
@@ -14,15 +14,14 @@ Feel free to visit [animalfacts.app](https://animalfacts.app) to see the latest 
 This repository uses the following technologies and frameworks:
 
 - Database
-    - [PostgreSQL](https://www.postgresql.org/), 15.1
+    - [Firestore](https://firebase.google.com/docs/firestore/)
 - API
-    - [Golang](https://go.dev/), 1.19
-    - [Gin](https://gin-gonic.com/)
+    - [Golang](https://go.dev/)
 - CLI
-    - [Golang](https://go.dev/), 1.19
+    - [Golang](https://go.dev/)
     - [Cobra](https://cobra.dev/)
 - Frontend
-    - [Angular](https://angular.io/), 15.1.1
+    - [Vue.js](https://vuejs.org/)
     - [TypeScript](https://www.typescriptlang.org/)
     - [NodeJS](https://nodejs.org/en/)
     - [Yarn](https://yarnpkg.com/)
