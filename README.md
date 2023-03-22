@@ -5,7 +5,7 @@
 
 This projects is about awesome facts about animals and make more people know these.
 
-The core is an [API](./api/) written in Golang that provides the animal facts. In the background there is a PostgreSQL database for storing the facts data. Additionally there is a [vue.js frontend](./frontend/), that is used as a showcase for the API and also handling requests for new facts or updates of existing facts. And for the CLI users there is an [animal-facts-cli](./cli/), that uses the API in the background.
+The core is an [API](./backend/) written in Golang that provides the animal facts. In the background there is a PostgreSQL database for storing the facts data. Additionally there is a [vue.js frontend](./frontend/), that is used as a showcase for the API and also handling requests for new facts or updates of existing facts. And for the CLI users there is an [animal-facts-cli](./cli/), that uses the API in the background.
 
 Feel free to visit [animalfacts.app](https://animalfacts.app) to see the latest version of the project in action!
 
@@ -67,7 +67,7 @@ services:
 ```
 Make sure to use a volume at your PostgreSQL database to not lose any fact data.
 ### API
-To start the Golang API locally run the following command in the [API directoy](./api/):
+To start the Golang API locally run the following command in the [API directoy](./backend/):
 ```
 go run ./...
 ```

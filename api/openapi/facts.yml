@@ -1,0 +1,207 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Animal Facts
+  description: Awesome Facts about animals
+  contact:
+    name: Animal Facts
+    url: https://animalfacts.app/
+servers:
+  - url: https://{hostname}/api
+    variables:
+      hostname:
+        default: localhost
+security:
+  - bearerAuth: []
+paths:
+  /fact:
+    get:
+      operationId: getFact
+      summary: Get a random animal fact
+      description: Getting a random animal fact
+      tags:
+      - facts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/components/schemas/Fact'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/components/schemas/Error'
+      default:
+        description: unexpected error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+    post:
+      operationId: createFact
+      summary: Add a new animal fact
+      description: Adding an animal fact
+      tags:
+      - facts
+      consumes:
+      - application/json
+      parameters:
+      - description: a new fact
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/components/schemas/Fact'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/components/schemas/Fact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/components/schemas/Error'
+      default:
+        description: unexpected error
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+  /fact/{factUUID}:
+    get:
+      operationId: getFactByID
+      summary: Get an animal fact by ID
+      description: Getting an animal fact by ID
+      tags:
+      - facts
+      parameters:
+        - in: path
+          name: factUUID
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The UUID of the fact
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/components/schemas/Fact'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/components/schemas/Error'
+    put:
+      operationId: updateFactByID
+      summary: Update an animal fact by ID
+      description: Updating an animal fact by ID
+      tags:
+      - facts
+      parameters:
+        - in: path
+          name: factUUID
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The UUID of the fact
+        - description: an updated fact
+          in: body
+          name: request
+          required: true
+          schema:
+            type: object
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/components/schemas/Fact'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/components/schemas/Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/components/schemas/Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/components/schemas/Error'
+    delete:
+      operationId: deleteFactByID
+      summary: Delete an animal fact
+      description: Deleting an animal fact
+      tags:
+      - facts
+      parameters:
+        - in: path
+          name: factUUID
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: The UUID of the fact
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/components/schemas/Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Fact:
+      type: object
+      required:
+        - uuid
+        - text
+        - source
+      properties:
+        uuid:
+          type: string
+          format: uuid
+        text:
+          type: string
+        source:
+          type: string
+    Message:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+    Error:
+      type: object
+      required:
+        - slug
+        - message
+      properties:
+        slug:
+          type: string
+        message:
+          type: string
