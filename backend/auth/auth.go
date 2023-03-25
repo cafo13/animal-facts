@@ -1,56 +1,101 @@
 package auth
 
 import (
-	"os"
-	"strconv"
-	"time"
+	"context"
+	"errors"
+	"net/http"
+	"strings"
 
-	"github.com/cafo13/animal-facts/api/database"
-	jwt "github.com/dgrijalva/jwt-go"
+	"firebase.google.com/go/v4/auth"
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
-type AuthHandler interface {
-	VerifyLogin(username string, password string) (string, error)
-	GenerateToken(userId uint) (string, error)
+type AuthMiddleware interface {
+	Middleware() gin.HandlerFunc
 }
 
-type AuthDataHandler struct {
-	Handler database.DatabaseHandler
+type FirebaseAuthMiddleware struct {
+	AuthClient *auth.Client
 }
 
-func NewAuthHandler(databaseHandler database.DatabaseHandler) AuthHandler {
-	return AuthDataHandler{Handler: databaseHandler}
+func NewFirebaseAuthMiddleware(authClient *auth.Client) AuthMiddleware {
+	return FirebaseAuthMiddleware{AuthClient: authClient}
 }
 
-func (adh AuthDataHandler) VerifyLogin(username string, password string) (string, error) {
-	user := &database.User{}
-	user.Database = *adh.Handler.GetDatabase()
-	user.Username = username
-	user.Password = password
-	err := user.CheckLogin()
-	if err != nil {
-		return "", err
+/*
+	func JwtAuthMiddleware() gin.HandlerFunc {
+		return func(c *gin.Context) {
+			err := TokenValid(c)
+			if err != nil {
+				c.String(http.StatusUnauthorized, "Unauthorized")
+				c.Abort()
+				return
+			}
+			c.Next()
+		}
+	}
+*/
+func (a FirebaseAuthMiddleware) Middleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		bearerToken := a.tokenFromHeader(ctx.Request)
+		if bearerToken == "" {
+			err := errors.New("empty bearer token")
+			log.Error(err)
+			ctx.JSON(http.StatusUnauthorized, gin.H{"Error": err.Error()})
+			return
+		}
+
+		token, err := a.AuthClient.VerifyIDToken(ctx, bearerToken)
+		if err != nil {
+			err := errors.New("empty jwt token")
+			log.Error(err)
+			ctx.JSON(http.StatusUnauthorized, gin.H{"Error": err.Error()})
+			return
+		}
+
+		ctx.Request = ctx.Request.WithContext(context.WithValue(ctx, userContextKey, User{
+			UUID:        token.UID,
+			Email:       token.Claims["email"].(string),
+			Role:        token.Claims["role"].(string),
+			DisplayName: token.Claims["name"].(string),
+		}))
+	}
+}
+
+func (a FirebaseAuthMiddleware) tokenFromHeader(r *http.Request) string {
+	headerValue := r.Header.Get("Authorization")
+
+	if len(headerValue) > 7 && strings.ToLower(headerValue[0:6]) == "bearer" {
+		return headerValue[7:]
 	}
 
-	token, err := adh.GenerateToken(user.ID)
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
+	return ""
 }
 
-func (adh AuthDataHandler) GenerateToken(userId uint) (string, error) {
-	tokenLifespan, err := strconv.Atoi(os.Getenv("TOKEN_HOUR_LIFESPAN"))
-	if err != nil {
-		return "", err
+type User struct {
+	UUID  string
+	Email string
+	Role  string
+
+	DisplayName string
+}
+
+type ctxKey int
+
+const (
+	userContextKey ctxKey = iota
+)
+
+var (
+	ErrNoUserInContext = errors.New("auth error: no user in context")
+)
+
+func UserFromCtx(ctx context.Context) (User, error) {
+	u, ok := ctx.Value(userContextKey).(User)
+	if ok {
+		return u, nil
 	}
 
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = userId
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(tokenLifespan)).Unix()
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	return token.SignedString([]byte(os.Getenv("API_SECRET")))
+	return User{}, ErrNoUserInContext
 }
