@@ -29,28 +29,26 @@ func (h HttpServer) GetFact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fact := appFactToResponse(appFact)
-	factResp := Fact{fact}
+	factResp := appFactToResponse(appFact)
 
 	render.Respond(w, r, factResp)
 }
 
 func (h HttpServer) GetFactByID(w http.ResponseWriter, r *http.Request, factUUID uuid.UUID) {
-	appFact, err := h.app.Queries.FactByID.Handle(r.Context(), query.FactByID{UUID: factUUID})
+	appFact, err := h.app.Queries.FactByID.Handle(r.Context(), query.FactByID{UUID: factUUID.String()})
 
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)
 		return
 	}
 
-	fact := appFactToResponse(appFact)
-	factResp := Fact{fact}
+	factResp := appFactToResponse(appFact)
 
 	render.Respond(w, r, factResp)
 }
 
 func (h HttpServer) CreateFact(w http.ResponseWriter, r *http.Request) {
-	postFact := PostFact{}
+	postFact := Fact{}
 	if err := render.Decode(r, &postFact); err != nil {
 		httperr.BadRequest("invalid-request", err, w, r)
 		return
@@ -68,9 +66,9 @@ func (h HttpServer) CreateFact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cmd := command.CreateFact{
-		FactUUID: uuid.New().String(),
-		Text:     postFact.Text,
-		Source:   postFact.Source,
+		FactUUID:   uuid.New(),
+		FactText:   postFact.Text,
+		FactSource: postFact.Source,
 	}
 	err = h.app.Commands.CreateFact.Handle(r.Context(), cmd)
 	if err != nil {
@@ -78,12 +76,12 @@ func (h HttpServer) CreateFact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("content-location", "/fact/"+cmd.FactUUID)
+	w.Header().Set("content-location", "/fact/"+cmd.FactUUID.String())
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (h HttpServer) UpdateFactByID(w http.ResponseWriter, r *http.Request, factUUID uuid.UUID) {
-	updateFact := PutFact{}
+	updateFact := UpdateFact{}
 	if err := render.Decode(r, &updateFact); err != nil {
 		httperr.BadRequest("invalid-request", err, w, r)
 		return
@@ -101,9 +99,9 @@ func (h HttpServer) UpdateFactByID(w http.ResponseWriter, r *http.Request, factU
 	}
 
 	err = h.app.Commands.UpdateFact.Handle(r.Context(), command.UpdateFact{
-		factUUID: factUUID,
-		Text:     postFact.Text,
-		Source:   postFact.Source,
+		FactUUID:  factUUID,
+		NewText:   updateFact.Text,
+		NewSource: updateFact.Source,
 	})
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)
@@ -124,7 +122,7 @@ func (h HttpServer) DeleteFactByID(w http.ResponseWriter, r *http.Request, factU
 	}
 
 	err = h.app.Commands.DeleteFact.Handle(r.Context(), command.DeleteFact{
-		UUID: factUUID,
+		FactUUID: factUUID,
 	})
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)

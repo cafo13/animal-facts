@@ -6,11 +6,12 @@ import (
 	"github.com/cafo13/animal-facts/backend/common/decorator"
 	"github.com/cafo13/animal-facts/backend/common/logs"
 	"github.com/cafo13/animal-facts/backend/facts/domain/fact"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 type CreateFact struct {
-	FactUUID   string
+	FactUUID   uuid.UUID
 	FactText   string
 	FactSource string
 }

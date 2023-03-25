@@ -17,3 +17,9 @@ type Fact struct {
 	Text   string             `json:"text"`
 	Uuid   openapi_types.UUID `json:"uuid"`
 }
+
+// UpdateFact defines model for UpdateFact.
+type UpdateFact struct {
+	Source string `json:"source"`
+	Text   string `json:"text"`
+}

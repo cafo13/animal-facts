@@ -119,7 +119,7 @@ paths:
           name: request
           required: true
           schema:
-            type: object
+            $ref: '#/components/schemas/UpdateFact'
       consumes:
       - application/json
       produces:
@@ -188,6 +188,18 @@ components:
           type: string
         source:
           type: string
+
+    UpdateFact:
+      type: object
+      required:
+        - text
+        - source
+      properties:
+        text:
+          type: string
+        source:
+          type: string
+
     Message:
       type: object
       required:
@@ -195,6 +207,7 @@ components:
       properties:
         text:
           type: string
+
     Error:
       type: object
       required:

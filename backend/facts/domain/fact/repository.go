@@ -3,6 +3,8 @@ package fact
 import (
 	"context"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type NotFoundError struct {
@@ -15,11 +17,11 @@ func (e NotFoundError) Error() string {
 
 type Repository interface {
 	AddFact(ctx context.Context, f *Fact) error
-	GetFact(ctx context.Context, factUUID string) (*Fact, error)
-	DeleteFact(ctx context.Context, factUUID string) error
+	GetFact(ctx context.Context, factUUID uuid.UUID) (*Fact, error)
+	DeleteFact(ctx context.Context, factUUID uuid.UUID) error
 	UpdateFact(
 		ctx context.Context,
-		factUUID string,
+		factUUID uuid.UUID,
 		updateFn func(ctx context.Context, tr *Fact) (*Fact, error),
 	) error
 }

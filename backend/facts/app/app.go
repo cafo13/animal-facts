@@ -18,4 +18,5 @@ type Commands struct {
 
 type Queries struct {
 	RandomFact query.RandomFactHandler
+	FactByID   query.FactByIDHandler
 }

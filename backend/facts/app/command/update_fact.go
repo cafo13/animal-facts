@@ -6,13 +6,14 @@ import (
 	"github.com/cafo13/animal-facts/backend/common/decorator"
 	"github.com/cafo13/animal-facts/backend/common/logs"
 	"github.com/cafo13/animal-facts/backend/facts/domain/fact"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 type UpdateFact struct {
-	FactUUID string
-	NewText  string
-	NewSouce string
+	FactUUID  uuid.UUID
+	NewText   string
+	NewSource string
 }
 
 type UpdateFactHandler decorator.CommandHandler[UpdateFact]
@@ -50,7 +51,7 @@ func (h updateFactHandler) Handle(ctx context.Context, cmd UpdateFact) (err erro
 				return nil, err
 			}
 
-			if err := f.UpdateSource(cmd.NewSouce); err != nil {
+			if err := f.UpdateSource(cmd.NewSource); err != nil {
 				return nil, err
 			}
 

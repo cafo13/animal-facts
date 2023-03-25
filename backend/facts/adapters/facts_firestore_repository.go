@@ -6,11 +6,12 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/cafo13/animal-facts/backend/facts/app/query"
 	"github.com/cafo13/animal-facts/backend/facts/domain/fact"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
 type FactModel struct {
-	UUID string `firestore:"Uuid"`
+	UUID uuid.UUID `firestore:"Uuid"`
 
 	Text   string `firestore:"Text"`
 	Source string `firestore:"Source"`
@@ -36,12 +37,12 @@ func (r FactsFirestoreRepository) AddFact(ctx context.Context, f *fact.Fact) err
 	factModel := r.marshalFact(f)
 
 	return r.firestoreClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		return tx.Create(collection.Doc(factModel.UUID), factModel)
+		return tx.Create(collection.Doc(factModel.UUID.String()), factModel)
 	})
 }
 
-func (r FactsFirestoreRepository) GetFact(ctx context.Context, factUUID string) (*fact.Fact, error) {
-	firestoreFact, err := r.factsCollection().Doc(factUUID).Get(ctx)
+func (r FactsFirestoreRepository) GetFact(ctx context.Context, factUUID uuid.UUID) (*fact.Fact, error) {
+	firestoreFact, err := r.factsCollection().Doc(factUUID.String()).Get(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get fact")
 	}
@@ -56,13 +57,13 @@ func (r FactsFirestoreRepository) GetFact(ctx context.Context, factUUID string) 
 
 func (r FactsFirestoreRepository) UpdateFact(
 	ctx context.Context,
-	factUUID string,
+	factUUID uuid.UUID,
 	updateFn func(ctx context.Context, f *fact.Fact) (*fact.Fact, error),
 ) error {
 	factsCollection := r.factsCollection()
 
 	return r.firestoreClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		documentRef := factsCollection.Doc(factUUID)
+		documentRef := factsCollection.Doc(factUUID.String())
 
 		firestoreFact, err := tx.Get(documentRef)
 		if err != nil {
@@ -83,8 +84,8 @@ func (r FactsFirestoreRepository) UpdateFact(
 	})
 }
 
-func (r FactsFirestoreRepository) DeleteFact(ctx context.Context, factUUID string) error {
-	_, err := r.factsCollection().Doc(factUUID).Delete(ctx)
+func (r FactsFirestoreRepository) DeleteFact(ctx context.Context, factUUID uuid.UUID) error {
+	_, err := r.factsCollection().Doc(factUUID.String()).Delete(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to delete fact")
 	}
@@ -92,16 +93,39 @@ func (r FactsFirestoreRepository) DeleteFact(ctx context.Context, factUUID strin
 	return nil
 }
 
-func (r FactsFirestoreRepository) FindRandomFact(ctx context.Context) (query.Fact, error) {
-	query := r.
+func (r FactsFirestoreRepository) FindFactByID(ctx context.Context, factUUID string) (query.Fact, error) {
+	q := r.
 		factsCollection().
 		Query.
-		Where("Uuid", "==", "1")
+		Where("Uuid", "==", factUUID)
+
+	doc, err := q.Documents(ctx).Next()
+	if err != nil {
+		return query.Fact{}, err
+	}
+
+	f, err := r.unmarshalFact(doc)
+	if err != nil {
+		return query.Fact{}, err
+	}
+
+	return query.Fact{
+		UUID:   f.UUID(),
+		Text:   f.Text(),
+		Source: f.Source(),
+	}, nil
+}
+
+func (r FactsFirestoreRepository) FindRandomFact(ctx context.Context) (query.Fact, error) {
+	// query := r.
+	// 	factsCollection().
+	// 	Query.
+	// 	Where("Uuid", "==", "1")
 
 	// iter := query.Documents(ctx)
 
 	return query.Fact{
-		UUID:   "123",
+		UUID:   uuid.New(),
 		Text:   "getting random fact is WIP needs to be implemented",
 		Source: "getting random fact is WIP needs to be implemented",
 	}, nil

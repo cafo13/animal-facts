@@ -2,6 +2,7 @@ package fact
 
 import (
 	commonerrors "github.com/cafo13/animal-facts/backend/common/errors"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 
@@ -9,14 +10,14 @@ var ErrTextTooLong = commonerrors.NewIncorrectInputError("Text too long", "text-
 var ErrSourceTooLong = commonerrors.NewIncorrectInputError("Source too long", "source-too-long")
 
 type Fact struct {
-	uuid string
+	uuid uuid.UUID
 
 	text   string
 	source string
 }
 
-func NewFact(uuid string, text string, source string) (*Fact, error) {
-	if uuid == "" {
+func NewFact(uuid uuid.UUID, text string, source string) (*Fact, error) {
+	if uuid.String() == "" {
 		return nil, errors.New("empty fact uuid")
 	}
 	if text == "" {
@@ -39,7 +40,7 @@ func NewFact(uuid string, text string, source string) (*Fact, error) {
 	}, nil
 }
 
-func (f Fact) UUID() string {
+func (f Fact) UUID() uuid.UUID {
 	return f.uuid
 }
 
