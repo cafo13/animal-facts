@@ -75,7 +75,7 @@ func addAuthMiddleware(router *chi.Mux) {
 		logrus.WithError(err).Fatal("Unable to create firebase Auth client")
 	}
 
-	router.Use(auth.FirebaseHttpMiddleware{authClient}.Middleware)
+	router.Use(auth.FirebaseHttpMiddleware{AuthClient: authClient}.Middleware)
 }
 
 func addCorsMiddleware(router *chi.Mux) {
