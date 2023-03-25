@@ -23,34 +23,21 @@ func NewFirebaseAuthMiddleware(authClient *auth.Client) AuthMiddleware {
 	return FirebaseAuthMiddleware{AuthClient: authClient}
 }
 
-/*
-	func JwtAuthMiddleware() gin.HandlerFunc {
-		return func(c *gin.Context) {
-			err := TokenValid(c)
-			if err != nil {
-				c.String(http.StatusUnauthorized, "Unauthorized")
-				c.Abort()
-				return
-			}
-			c.Next()
-		}
-	}
-*/
 func (a FirebaseAuthMiddleware) Middleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		bearerToken := a.tokenFromHeader(ctx.Request)
 		if bearerToken == "" {
-			err := errors.New("empty bearer token")
-			log.Error(err)
-			ctx.JSON(http.StatusUnauthorized, gin.H{"Error": err.Error()})
+			log.Error(errors.New("empty bearer token"))
+			ctx.String(http.StatusUnauthorized, "Unauthorized")
+			ctx.Abort()
 			return
 		}
 
 		token, err := a.AuthClient.VerifyIDToken(ctx, bearerToken)
 		if err != nil {
-			err := errors.New("empty jwt token")
-			log.Error(err)
-			ctx.JSON(http.StatusUnauthorized, gin.H{"Error": err.Error()})
+			log.Error(errors.New("empty jwt token"))
+			ctx.String(http.StatusUnauthorized, "Unauthorized")
+			ctx.Abort()
 			return
 		}
 
@@ -60,6 +47,8 @@ func (a FirebaseAuthMiddleware) Middleware() gin.HandlerFunc {
 			Role:        token.Claims["role"].(string),
 			DisplayName: token.Claims["name"].(string),
 		}))
+
+		ctx.Next()
 	}
 }
 
