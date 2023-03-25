@@ -1,15 +1,14 @@
 package openapi
 
 import (
-	"context"
 	"net/http"
 
-	"github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/internal/common/auth"
-	"github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/internal/common/server/httperr"
-	"github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/internal/trainings/app"
-	"github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/internal/trainings/app/command"
-	"github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/internal/trainings/app/query"
-	"github.com/ThreeDotsLabs/wild-workouts-go-ddd-example/internal/trainings/domain/training"
+	"github.com/cafo13/animal-facts/backend/common/auth"
+	"github.com/cafo13/animal-facts/backend/common/server/httperr"
+	"github.com/cafo13/animal-facts/backend/facts/app"
+	"github.com/cafo13/animal-facts/backend/facts/app/command"
+	"github.com/cafo13/animal-facts/backend/facts/app/query"
+
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
 )
@@ -22,35 +21,37 @@ func NewHttpServer(app app.Application) HttpServer {
 	return HttpServer{app}
 }
 
-func (h HttpServer) GetTrainings(w http.ResponseWriter, r *http.Request) {
-	user, err := auth.UserFromCtx(r.Context())
-	if err != nil {
-		httperr.RespondWithSlugError(err, w, r)
-		return
-	}
-
-	var appTrainings []query.Training
-
-	if user.Role == "trainer" {
-		appTrainings, err = h.app.Queries.AllTrainings.Handle(r.Context(), query.AllTrainings{})
-	} else {
-		appTrainings, err = h.app.Queries.TrainingsForUser.Handle(r.Context(), query.TrainingsForUser{User: user})
-	}
+func (h HttpServer) GetFact(w http.ResponseWriter, r *http.Request) {
+	appFact, err := h.app.Queries.RandomFact.Handle(r.Context(), query.RandomFact{})
 
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)
 		return
 	}
 
-	trainings := appTrainingsToResponse(appTrainings)
-	trainingsResp := Trainings{trainings}
+	fact := appFactToResponse(appFact)
+	factResp := Fact{fact}
 
-	render.Respond(w, r, trainingsResp)
+	render.Respond(w, r, factResp)
 }
 
-func (h HttpServer) CreateTraining(w http.ResponseWriter, r *http.Request) {
-	postTraining := PostTraining{}
-	if err := render.Decode(r, &postTraining); err != nil {
+func (h HttpServer) GetFactByID(w http.ResponseWriter, r *http.Request, factUUID uuid.UUID) {
+	appFact, err := h.app.Queries.FactByID.Handle(r.Context(), query.FactByID{UUID: factUUID})
+
+	if err != nil {
+		httperr.RespondWithSlugError(err, w, r)
+		return
+	}
+
+	fact := appFactToResponse(appFact)
+	factResp := Fact{fact}
+
+	render.Respond(w, r, factResp)
+}
+
+func (h HttpServer) CreateFact(w http.ResponseWriter, r *http.Request) {
+	postFact := PostFact{}
+	if err := render.Decode(r, &postFact); err != nil {
 		httperr.BadRequest("invalid-request", err, w, r)
 		return
 	}
@@ -61,63 +62,48 @@ func (h HttpServer) CreateTraining(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if user.Role != "attendee" {
+	if user.Role != "admin" {
 		httperr.Unauthorised("invalid-role", nil, w, r)
 		return
 	}
 
-	cmd := command.ScheduleTraining{
-		TrainingUUID: uuid.New().String(),
-		UserUUID:     user.UUID,
-		UserName:     user.DisplayName,
-		TrainingTime: postTraining.Time,
-		Notes:        postTraining.Notes,
+	cmd := command.CreateFact{
+		FactUUID: uuid.New().String(),
+		Text:     postFact.Text,
+		Source:   postFact.Source,
 	}
-	err = h.app.Commands.ScheduleTraining.Handle(r.Context(), cmd)
+	err = h.app.Commands.CreateFact.Handle(r.Context(), cmd)
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)
 		return
 	}
 
-	w.Header().Set("content-location", "/trainings/"+cmd.TrainingUUID)
+	w.Header().Set("content-location", "/fact/"+cmd.FactUUID)
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (h HttpServer) CancelTraining(w http.ResponseWriter, r *http.Request, trainingUUID string) {
-	user, err := newDomainUserFromAuthUser(r.Context())
-	if err != nil {
-		httperr.RespondWithSlugError(err, w, r)
-		return
-	}
-
-	err = h.app.Commands.CancelTraining.Handle(r.Context(), command.CancelTraining{
-		TrainingUUID: trainingUUID,
-		User:         user,
-	})
-	if err != nil {
-		httperr.RespondWithSlugError(err, w, r)
-		return
-	}
-}
-
-func (h HttpServer) RescheduleTraining(w http.ResponseWriter, r *http.Request, trainingUUID string) {
-	rescheduleTraining := PostTraining{}
-	if err := render.Decode(r, &rescheduleTraining); err != nil {
+func (h HttpServer) UpdateFactByID(w http.ResponseWriter, r *http.Request, factUUID uuid.UUID) {
+	updateFact := PutFact{}
+	if err := render.Decode(r, &updateFact); err != nil {
 		httperr.BadRequest("invalid-request", err, w, r)
 		return
 	}
 
-	user, err := newDomainUserFromAuthUser(r.Context())
+	user, err := auth.UserFromCtx(r.Context())
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)
 		return
 	}
 
-	err = h.app.Commands.RescheduleTraining.Handle(r.Context(), command.RescheduleTraining{
-		User:         user,
-		TrainingUUID: trainingUUID,
-		NewTime:      rescheduleTraining.Time,
-		NewNotes:     rescheduleTraining.Notes,
+	if user.Role != "admin" {
+		httperr.Unauthorised("invalid-role", nil, w, r)
+		return
+	}
+
+	err = h.app.Commands.UpdateFact.Handle(r.Context(), command.UpdateFact{
+		factUUID: factUUID,
+		Text:     postFact.Text,
+		Source:   postFact.Source,
 	})
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)
@@ -125,24 +111,20 @@ func (h HttpServer) RescheduleTraining(w http.ResponseWriter, r *http.Request, t
 	}
 }
 
-func (h HttpServer) RequestRescheduleTraining(w http.ResponseWriter, r *http.Request, trainingUUID string) {
-	rescheduleTraining := PostTraining{}
-	if err := render.Decode(r, &rescheduleTraining); err != nil {
-		httperr.BadRequest("invalid-request", err, w, r)
-		return
-	}
-
-	user, err := newDomainUserFromAuthUser(r.Context())
+func (h HttpServer) DeleteFactByID(w http.ResponseWriter, r *http.Request, factUUID uuid.UUID) {
+	user, err := auth.UserFromCtx(r.Context())
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)
 		return
 	}
 
-	err = h.app.Commands.RequestTrainingReschedule.Handle(r.Context(), command.RequestTrainingReschedule{
-		User:         user,
-		TrainingUUID: trainingUUID,
-		NewTime:      rescheduleTraining.Time,
-		NewNotes:     rescheduleTraining.Notes,
+	if user.Role != "admin" {
+		httperr.Unauthorised("invalid-role", nil, w, r)
+		return
+	}
+
+	err = h.app.Commands.DeleteFact.Handle(r.Context(), command.DeleteFact{
+		UUID: factUUID,
 	})
 	if err != nil {
 		httperr.RespondWithSlugError(err, w, r)
@@ -150,71 +132,10 @@ func (h HttpServer) RequestRescheduleTraining(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (h HttpServer) ApproveRescheduleTraining(w http.ResponseWriter, r *http.Request, trainingUUID string) {
-	user, err := newDomainUserFromAuthUser(r.Context())
-	if err != nil {
-		httperr.RespondWithSlugError(err, w, r)
-		return
+func appFactToResponse(appFact query.Fact) Fact {
+	return Fact{
+		Uuid:   appFact.UUID,
+		Text:   appFact.Text,
+		Source: appFact.Source,
 	}
-
-	err = h.app.Commands.ApproveTrainingReschedule.Handle(r.Context(), command.ApproveTrainingReschedule{
-		User:         user,
-		TrainingUUID: trainingUUID,
-	})
-	if err != nil {
-		httperr.RespondWithSlugError(err, w, r)
-		return
-	}
-}
-
-func (h HttpServer) RejectRescheduleTraining(w http.ResponseWriter, r *http.Request, trainingUUID string) {
-	user, err := newDomainUserFromAuthUser(r.Context())
-	if err != nil {
-		httperr.RespondWithSlugError(err, w, r)
-		return
-	}
-
-	err = h.app.Commands.RejectTrainingReschedule.Handle(r.Context(), command.RejectTrainingReschedule{
-		User:         user,
-		TrainingUUID: trainingUUID,
-	})
-	if err != nil {
-		httperr.RespondWithSlugError(err, w, r)
-		return
-	}
-}
-
-func appTrainingsToResponse(appTrainings []query.Training) []Training {
-	var trainings []Training
-	for _, tm := range appTrainings {
-		t := Training{
-			CanBeCancelled:     tm.CanBeCancelled,
-			MoveProposedBy:     tm.MoveProposedBy,
-			MoveRequiresAccept: tm.CanBeCancelled,
-			Notes:              tm.Notes,
-			ProposedTime:       tm.ProposedTime,
-			Time:               tm.Time,
-			User:               tm.User,
-			UserUuid:           tm.UserUUID,
-			Uuid:               tm.UUID,
-		}
-
-		trainings = append(trainings, t)
-	}
-
-	return trainings
-}
-
-func newDomainUserFromAuthUser(ctx context.Context) (training.User, error) {
-	user, err := auth.UserFromCtx(ctx)
-	if err != nil {
-		return training.User{}, err
-	}
-
-	userType, err := training.NewUserTypeFromString(user.Role)
-	if err != nil {
-		return training.User{}, err
-	}
-
-	return training.NewUser(user.UUID, userType)
 }

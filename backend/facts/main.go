@@ -9,7 +9,7 @@ import (
 	"github.com/cafo13/animal-facts/backend/facts/openapi"
 	"github.com/cafo13/animal-facts/backend/facts/service"
 
-	chi "github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5"
 )
 
 func main() {
