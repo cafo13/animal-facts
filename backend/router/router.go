@@ -29,23 +29,6 @@ type Router struct {
 	FactsRepository repository.FactsRepository
 }
 
-type MessageResponse struct {
-	Message string
-}
-
-type ErrorResponse struct {
-	Error error
-}
-
-type LoginResponse struct {
-	Token string `json:"token"`
-}
-
-type LoginInput struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
 func NewRouter(authMiddleware auth.AuthMiddleware, factsRepository repository.FactsRepository) GinRouter {
 	return Router{Router: gin.Default(), AuthMiddleware: authMiddleware, FactsRepository: factsRepository}
 }

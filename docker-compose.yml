@@ -1,0 +1,41 @@
+version: '3.8'
+name: 'animal-facts'
+services:
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    working_dir: /frontend
+    volumes:
+      - ./frontend:/frontend
+      - /frontend/node_modules/SERVER_TO_RUN
+    ports:
+      - "3000:80"
+
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./backend:/backend
+      - ./.go/pkg:/go/pkg
+      - ./.go-cache:/go-cache
+    working_dir: /backend
+    ports:
+      - "3001:80"
+    env_file:
+      - .env
+    environment:
+      GOCACHE: /go-cache
+    depends_on:
+      - firestore
+
+  firestore:
+    build:
+      context: firestore-emulator
+    env_file:
+      - .env
+    ports:
+      - "3002:8787"
+      - "3003:4000"
+    restart: unless-stopped

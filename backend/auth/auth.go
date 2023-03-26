@@ -2,12 +2,12 @@ package auth
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"strings"
 
 	"firebase.google.com/go/v4/auth"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +35,7 @@ func (a FirebaseAuthMiddleware) Middleware() gin.HandlerFunc {
 
 		token, err := a.AuthClient.VerifyIDToken(ctx, bearerToken)
 		if err != nil {
-			log.Error(errors.New("empty jwt token"))
+			log.Error(errors.Wrap(err, "unable to verify jwt"))
 			ctx.String(http.StatusUnauthorized, "Unauthorized")
 			ctx.Abort()
 			return

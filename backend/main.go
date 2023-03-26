@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"os"
+	"strconv"
 
 	"cloud.google.com/go/firestore"
 
@@ -20,6 +21,11 @@ func setupLogger() {
 }
 
 func setupAuthMiddleware() *auth.AuthMiddleware {
+	if mockAuth, _ := strconv.ParseBool(os.Getenv("MOCK_AUTH")); mockAuth {
+		authMiddleware := auth.NewMockAuthMiddleware()
+		return &authMiddleware
+	}
+
 	config := &firebase.Config{ProjectID: os.Getenv("GCP_PROJECT")}
 	firebaseApp, err := firebase.NewApp(context.Background(), config)
 	if err != nil {

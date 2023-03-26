@@ -25,8 +25,12 @@ func (r FactsFirestoreRepository) factsCollection() *firestore.CollectionRef {
 func (r FactsFirestoreRepository) CreateFact(ctx context.Context, f *FactModel) error {
 	collection := r.factsCollection()
 
+	factUuid := uuid.New()
+
+	f.UUID = factUuid
+
 	return r.firestoreClient.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		return tx.Create(collection.Doc(uuid.NewString()), f)
+		return tx.Create(collection.Doc(factUuid.String()), f)
 	})
 }
 
