@@ -27,21 +27,28 @@ jobs:
     steps:
       - name: Check out Code
         uses: actions/checkout@v3
-      - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      - id: auth
+        name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v0
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+          token_format: access_token
+          workload_identity_provider: ${{ secrets.REGISTRY_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.REGISTRY_SERVICE_ACCOUNT }}
+          access_token_lifetime: 300s
+      - name: Login to Artifact Registry
+        uses: docker/login-action@v1
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-      - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+          registry: europe-west4-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+      - name: Get tag
+        id: get-tag
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+      - id: docker-push-tagged
+        name: Tag Docker image and push to Google Artifact Registry
+        uses: docker/build-push-action@v2
         with:
-          context: ./frontend
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+             europe-west4-docker.pkg.dev/animal-facts-project/animal-facts/frontend:${{ steps.get-tag.outputs.short_ref }}
+             europe-west4-docker.pkg.dev/animal-facts-project/animal-facts/frontend:latest
