@@ -12,15 +12,15 @@ services:
     ports:
       - "3000:80"
 
-  backend:
+  facts-api:
     build:
-      context: backend
+      context: backend/facts-api
       dockerfile: Dockerfile.dev
     volumes:
-      - ./backend:/backend
+      - ./backend/facts-api:/backend/facts-api
       - ./.go/pkg:/go/pkg
       - ./.go-cache:/go-cache
-    working_dir: /backend
+    working_dir: /backend/facts-api
     ports:
       - "3001:80"
     env_file:

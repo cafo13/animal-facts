@@ -6,7 +6,7 @@
       {
         "source": "/api/v1{,/**}",
         "run": {
-          "serviceId": "animal-facts-backend",
+          "serviceId": "facts-api",
           "region": "europe-west4"
         }
       },

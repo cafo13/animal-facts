@@ -6,4 +6,4 @@ COPY . .
 RUN go mod download && go mod verify
 RUN CGO_ENABLED=0 GOOS=linux go build -o /animalfacts ./...
 
-CMD ["/animalfacts/backend"]
+CMD ["/animalfacts/facts-api"]

@@ -7,9 +7,9 @@ import (
 
 	"cloud.google.com/go/firestore"
 
-	"github.com/cafo13/animal-facts/backend/auth"
-	"github.com/cafo13/animal-facts/backend/repository"
-	"github.com/cafo13/animal-facts/backend/router"
+	"github.com/cafo13/animal-facts/backend/facts-api/auth"
+	"github.com/cafo13/animal-facts/backend/facts-api/repository"
+	"github.com/cafo13/animal-facts/backend/facts-api/router"
 
 	firebase "firebase.google.com/go/v4"
 	log "github.com/sirupsen/logrus"

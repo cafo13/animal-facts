@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cafo13/animal-facts/backend/auth"
-	"github.com/cafo13/animal-facts/backend/repository"
+	"github.com/cafo13/animal-facts/backend/facts-api/auth"
+	"github.com/cafo13/animal-facts/backend/facts-api/repository"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"

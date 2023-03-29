@@ -1,4 +1,4 @@
-name: frontend
+name: Build and deploy frontend to firebase hosting
 
 on:
   push:
@@ -6,51 +6,17 @@ on:
     paths:
       - frontend/**
       - .github/workflows/frontend.yml
-  pull_request:
-    branches: ["main"]
-    paths:
-      - frontend/**
-      - .github/workflows/frontend.yml
-
-env:
-  REGISTRY: ghcr.io
 
 jobs:
-  build:
-    name: build
+  build_and_deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-    env:
-      IMAGE_NAME: ${{ github.repository }}/frontend
     steps:
-      - name: Check out Code
-        uses: actions/checkout@v3
-      - id: auth
-        name: Authenticate with Google Cloud
-        uses: google-github-actions/auth@v0
+      - uses: actions/checkout@v3
+      - run: yarn && yarn build
+        working-directory: ./frontend
+      - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          token_format: access_token
-          workload_identity_provider: ${{ secrets.REGISTRY_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.REGISTRY_SERVICE_ACCOUNT }}
-          access_token_lifetime: 300s
-      - name: Login to Artifact Registry
-        uses: docker/login-action@v1
-        with:
-          registry: europe-west4-docker.pkg.dev
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
-      - name: Get tag
-        id: get-tag
-        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-      - id: docker-push-tagged
-        name: Tag Docker image and push to Google Artifact Registry
-        uses: docker/build-push-action@v2
-        with:
-          context: ./frontend
-          push: true
-          tags: |
-             europe-west4-docker.pkg.dev/animal-facts-project/animal-facts/frontend:${{ steps.get-tag.outputs.short_ref }}
-             europe-west4-docker.pkg.dev/animal-facts-project/animal-facts/frontend:latest
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ANIMAL_FACTS_PROJECT }}'
+          channelId: live
+          projectId: animal-facts-project
