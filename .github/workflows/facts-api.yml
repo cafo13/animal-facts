@@ -30,8 +30,8 @@ jobs:
       - name: run tests
         run: go test ./...
         working-directory: ./backend/facts-api
-  build:
-    name: build
+  build_and_push_image:
+    name: Build and push docker image
     runs-on: ubuntu-latest
     permissions:
       contents: read
