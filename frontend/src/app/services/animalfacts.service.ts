@@ -1,29 +1,28 @@
-import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core'
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
 
-import { Observable } from 'rxjs'
+import { Observable } from "rxjs";
 
-import { environment } from 'src/environments/environment'
+import { environment } from "src/environments/environment";
 
 export type Fact = {
-    ID: string
-    Text: string
-    Category: string
-    Source: string
-}
+  ID: string;
+  Text: string;
+  Source: string;
+};
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: "root",
 })
 export class AnimalfactsService {
-    apiBaseDomain = environment.apiEndpoint
+  apiBaseDomain = environment.apiEndpoint;
 
-    constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {}
 
-    getFact(id?: string): Observable<Fact> {
-        if (id) {
-            return this.http.get<Fact>(`${this.apiBaseDomain}/fact/${id}`)
-        }
-        return this.http.get<Fact>(`${this.apiBaseDomain}/fact`)
+  getFact(id?: string): Observable<Fact> {
+    if (id) {
+      return this.http.get<Fact>(`${this.apiBaseDomain}/fact/${id}`);
     }
+    return this.http.get<Fact>(`${this.apiBaseDomain}/fact`);
+  }
 }
