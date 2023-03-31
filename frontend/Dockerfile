@@ -8,4 +8,4 @@ RUN yarn build
 FROM nginx:1.23.3
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /frontend/dist /usr/share/nginx/html
+COPY --from=builder /frontend/dist/animal-facts /usr/share/nginx/html

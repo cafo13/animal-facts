@@ -9,6 +9,7 @@ services:
     volumes:
       - ./frontend:/frontend
       - /frontend/node_modules/SERVER_TO_RUN
+    restart: unless-stopped
     ports:
       - "3000:80"
 
@@ -27,6 +28,7 @@ services:
       - .env
     environment:
       GOCACHE: /go-cache
+    restart: unless-stopped
     depends_on:
       - firestore
 

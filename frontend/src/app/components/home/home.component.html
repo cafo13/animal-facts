@@ -1,0 +1,11 @@
+<app-fact
+    [id]="this.currentFact.ID"
+    [text]="this.currentFact.Text"
+    [category]="this.currentFact.Category"
+    [source]="this.currentFact.Source"
+></app-fact>
+<app-fact-controls
+    class="fact-controls"
+    [value]="progressValue"
+    (timerEnd)="this.resetFactTimer()"
+></app-fact-controls>
