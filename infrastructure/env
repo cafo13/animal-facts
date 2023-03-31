@@ -1,0 +1,7 @@
+# copy this file and name it .env. Afterwards fill in the values
+export TF_VAR_project=
+export TF_VAR_user=
+export TF_VAR_billing_account=
+export TF_VAR_region=
+export TF_VAR_firebase_location=
+export TF_VAR_app_version=
