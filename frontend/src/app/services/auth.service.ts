@@ -1,6 +1,4 @@
-import { Injectable, NgZone } from "@angular/core";
-import { User } from "../services/user";
-import * as auth from "firebase/auth";
+import { Injectable } from "@angular/core";
 import { AngularFireAuth } from "@angular/fire/compat/auth";
 import { Router } from "@angular/router";
 
@@ -8,15 +6,9 @@ import { Router } from "@angular/router";
   providedIn: "root",
 })
 export class AuthService {
-  userData: any; // Save logged in user data
+  userData: any;
 
-  constructor(
-    public afAuth: AngularFireAuth, // Inject Firebase auth service
-    public router: Router,
-    public ngZone: NgZone // NgZone service to remove outside scope warning
-  ) {
-    /* Saving user data in localstorage when
-    logged in and setting up null when logged out */
+  constructor(public afAuth: AngularFireAuth, public router: Router) {
     this.afAuth.authState.subscribe((user) => {
       if (user) {
         this.userData = user;
@@ -29,19 +21,30 @@ export class AuthService {
     });
   }
 
-  // Sign in with email/password
-  SignIn(email: string, password: string) {
+  async SignIn(email: string, password: string) {
     return this.afAuth
       .signInWithEmailAndPassword(email, password)
       .then((_user) => {
         this.afAuth.authState.subscribe((user) => {
           if (user) {
-            this.router.navigate(["home"]);
+            this.router.navigate(["admin-area"]);
           }
         });
       })
       .catch((error) => {
         window.alert(error.message);
       });
+  }
+
+  async SignOut() {
+    return this.afAuth.signOut().then(() => {
+      localStorage.removeItem("user");
+      this.router.navigate(["sign-in"]);
+    });
+  }
+
+  get isLoggedIn(): boolean {
+    const user = JSON.parse(localStorage.getItem("user")!);
+    return user !== null ? true : false;
   }
 }

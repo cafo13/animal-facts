@@ -19,6 +19,7 @@ import { FactControlsComponent } from "./components/fact-controls/fact-controls.
 import { environment } from "../environments/environment";
 import { SignInComponent } from "./components/sign-in/sign-in.component";
 import { AuthService } from "./services/auth.service";
+import { AdminAreaComponent } from './components/admin-area/admin-area.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { AuthService } from "./services/auth.service";
     FactComponent,
     FactControlsComponent,
     SignInComponent,
+    AdminAreaComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebaseConfig),

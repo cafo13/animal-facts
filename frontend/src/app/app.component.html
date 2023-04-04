@@ -2,6 +2,12 @@
   <mat-toolbar>
     <span>Animal Facts</span>
     <span class="spacer"></span>
+    <mat-icon
+      aria-hidden="false"
+      aria-label="Logout icon"
+      fontIcon="logout"
+      (click)="this.authService.SignOut()"
+    ></mat-icon>
   </mat-toolbar>
 </div>
 
