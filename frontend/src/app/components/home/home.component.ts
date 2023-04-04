@@ -12,7 +12,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   factRetentionSeconds = 30;
   progressSub: Subscription | undefined = undefined;
   progressValue: number = this.factRetentionSeconds;
-  currentFact: Fact = { ID: "", Text: "", Source: "" };
+  currentFact: Fact = { uuid: "", text: "", source: "", approved: false };
 
   constructor(private animalfactsService: AnimalfactsService) {}
 

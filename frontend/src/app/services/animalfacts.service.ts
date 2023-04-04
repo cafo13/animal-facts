@@ -6,9 +6,10 @@ import { Observable } from "rxjs";
 import { environment } from "src/environments/environment";
 
 export type Fact = {
-  ID: string;
-  Text: string;
-  Source: string;
+  uuid: string;
+  text: string;
+  source: string;
+  approved: boolean;
 };
 
 @Injectable({

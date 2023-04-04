@@ -42,10 +42,8 @@ func (a FirebaseAuthMiddleware) Middleware() gin.HandlerFunc {
 		}
 
 		ctx.Request = ctx.Request.WithContext(context.WithValue(ctx, userContextKey, User{
-			UUID:        token.UID,
-			Email:       token.Claims["email"].(string),
-			Role:        token.Claims["role"].(string),
-			DisplayName: token.Claims["name"].(string),
+			UUID:  token.UID,
+			Email: token.Claims["email"].(string),
 		}))
 
 		ctx.Next()

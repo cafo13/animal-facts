@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"math/rand"
 
 	"cloud.google.com/go/firestore"
 	"github.com/google/uuid"
@@ -49,10 +50,20 @@ func (r FactsFirestoreRepository) ReadFact(ctx context.Context, factUUID string)
 }
 
 func (r FactsFirestoreRepository) ReadRandomFact(ctx context.Context) (*FactModel, error) {
-	// TODO: Get all UUIDs from facts collection, select random one
-	firestoreFact, err := r.factsCollection().Doc(uuid.NewString()).Get(ctx)
+	allIds, err := r.factsCollection().DocumentRefs(ctx).GetAll()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get random fact")
+		return nil, errors.Wrap(err, "failed to get all document refs to select random fact")
+	}
+
+	factCount := len(allIds)
+	if factCount < 1 {
+		return nil, errors.New("no facts found, unable to select random fact")
+	}
+
+	randomFact := *allIds[rand.Intn(factCount)]
+	firestoreFact, err := r.factsCollection().Doc(randomFact.ID).Get(ctx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get randomly selected fact with ID %s", randomFact.ID)
 	}
 
 	f, err := r.unmarshalFact(firestoreFact)

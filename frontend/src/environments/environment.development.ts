@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiEndpoint: "http://localhost:3001/api/v1",
+  apiEndpoint: "http://localhost:8080/api/v1",
   firebaseConfig: {
     apiKey: "AIzaSyCQMSFSNumSH5Xvhi0mCL_jy_tKLbSJoCM",
     authDomain: "animal-facts-project.firebaseapp.com",
