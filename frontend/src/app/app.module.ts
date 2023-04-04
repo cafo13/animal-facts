@@ -18,9 +18,6 @@ import { FactControlsComponent } from "./components/fact-controls/fact-controls.
 
 import { environment } from "../environments/environment";
 import { SignInComponent } from "./components/sign-in/sign-in.component";
-import { SignUpComponent } from "./components/sign-up/sign-up.component";
-import { ForgotPasswordComponent } from "./components/forgot-password/forgot-password.component";
-import { VerifyEmailComponent } from "./components/verify-email/verify-email.component";
 import { AuthService } from "./services/auth.service";
 
 @NgModule({
@@ -30,9 +27,6 @@ import { AuthService } from "./services/auth.service";
     FactComponent,
     FactControlsComponent,
     SignInComponent,
-    SignUpComponent,
-    ForgotPasswordComponent,
-    VerifyEmailComponent,
   ],
   imports: [
     AngularFireModule.initializeApp(environment.firebaseConfig),
