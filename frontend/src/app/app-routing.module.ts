@@ -10,7 +10,7 @@ const routes: Routes = [
   { path: "home", component: HomeComponent },
   { path: "sign-in", component: SignInComponent },
   {
-    path: "admin-area",
+    path: "admin",
     component: AdminAreaComponent,
     canActivate: [AuthGuard],
   },

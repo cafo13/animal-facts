@@ -6,6 +6,7 @@
       aria-hidden="false"
       aria-label="Logout icon"
       fontIcon="logout"
+      *ngIf="this.authService.isLoggedIn"
       (click)="this.authService.SignOut()"
     ></mat-icon>
   </mat-toolbar>

@@ -27,7 +27,7 @@ export class AuthService {
       .then((_user) => {
         this.afAuth.authState.subscribe((user) => {
           if (user) {
-            this.router.navigate(["admin-area"]);
+            this.router.navigate(["admin"]);
           }
         });
       })
