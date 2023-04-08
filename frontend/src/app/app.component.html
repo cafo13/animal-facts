@@ -1,27 +1,5 @@
-<div class="header">
-  <mat-toolbar>
-    <span>Animal Facts</span>
-    <span class="spacer"></span>
-    <mat-icon
-      aria-hidden="false"
-      aria-label="Logout icon"
-      fontIcon="logout"
-      *ngIf="this.authService.isLoggedIn"
-      (click)="this.authService.SignOut()"
-    ></mat-icon>
-  </mat-toolbar>
-</div>
-
+<app-menu-bar></app-menu-bar>
 <div class="main">
   <router-outlet></router-outlet>
 </div>
-
-<div class="footer">
-  <mat-toolbar>
-    <span class="spacer"></span>
-    <span>Imprint</span>
-    <span class="small-spacer"></span>
-    <span>Privacy policy</span>
-    <span class="spacer"></span>
-  </mat-toolbar>
-</div>
+<app-footer></app-footer>

@@ -1,6 +1,4 @@
 import { Component } from "@angular/core";
-import { Router } from "@angular/router";
-import { AuthService } from "./services/auth.service";
 
 @Component({
   selector: "app-root",
@@ -8,9 +6,5 @@ import { AuthService } from "./services/auth.service";
   styleUrls: ["./app.component.scss"],
 })
 export class AppComponent {
-  constructor(protected router: Router, protected authService: AuthService) {}
-
-  navigateTo(componentName: string) {
-    this.router.navigate([componentName], { skipLocationChange: true });
-  }
+  constructor() {}
 }
