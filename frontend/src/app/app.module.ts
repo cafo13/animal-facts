@@ -31,10 +31,11 @@ import { environment } from "../environments/environment";
 import { SignInComponent } from "./components/sign-in/sign-in.component";
 import { AuthService } from "./services/auth.service";
 import { AdminAreaComponent } from "./components/admin-area/admin-area.component";
-import { MenuBarComponent } from './components/menu-bar/menu-bar.component';
-import { FooterComponent } from './components/footer/footer.component';
-import { ImprintComponent } from './components/imprint/imprint.component';
-import { PrivacyPolicyComponent } from './components/privacy-policy/privacy-policy.component';
+import { MenuBarComponent } from "./components/menu-bar/menu-bar.component";
+import { FooterComponent } from "./components/footer/footer.component";
+import { ImprintComponent } from "./components/imprint/imprint.component";
+import { PrivacyPolicyComponent } from "./components/privacy-policy/privacy-policy.component";
+import { AuthGuard } from "./guards/auth.guard";
 
 @NgModule({
   declarations: [
@@ -72,7 +73,7 @@ import { PrivacyPolicyComponent } from './components/privacy-policy/privacy-poli
     MdbTooltipModule,
     MdbValidationModule,
   ],
-  providers: [AuthService],
+  providers: [AuthService, AuthGuard],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
