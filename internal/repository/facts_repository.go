@@ -53,21 +53,14 @@ func NewMongoDBFactsRepository(mongoDbUri string) (FactsRepository, error) {
 }
 
 func (m *MongoDBFactsRepository) GetFact(id int) (*Fact, error) {
-	// Creates a query filter to match documents in which the "name" is
-	// "Bagels N Buns"
-	filter := bson.D{{"name", "Bagels N Buns"}}
-	// Retrieves the first matching document
-	var result Restaurant
-	err := coll.FindOne(context.TODO(), filter).Decode(&result)
-
-	// Prints a message if no documents are matched or if any
-	// other errors occur during the operation
+	filter := bson.D{{"_id", id}}
+	var result Fact
+	err := m.factsCollection().FindOne(context.TODO(), filter).Decode(&result)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, err
-		}
-		panic(err)
+		return nil, err
 	}
+
+	return &result, nil
 }
 
 func (m *MongoDBFactsRepository) GetRandomFact() (*Fact, error) {
