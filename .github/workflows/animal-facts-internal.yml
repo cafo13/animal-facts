@@ -1,0 +1,108 @@
+name: animal_facts_internal
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - .github/workflows/animal-facts-internal.yml
+      - cmd/internal-api/
+      - internal-api/
+      - pkg/
+
+jobs:
+  semver:
+    name: Generate semantic version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+    steps:
+      - name: Check out Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: semver
+        name: Git Semantic Version
+        uses: PaulHatch/semantic-version@v5.3.0
+        with:
+          tag_prefix: "internal-api-v"
+          major_pattern: "(MAJOR)"
+          major_regexp_flags: ""
+          minor_pattern: "(MINOR)"
+          minor_regexp_flags: ""
+          version_format: "${major}.${minor}.${patch}"
+          change_path: "cmd/internal-api internal-api pkg"
+          bump_each_commit: true
+          search_commit_body: true
+          user_format_type: "json"
+
+  tests:
+    name: go tests
+    runs-on: ubuntu-latest
+    container:
+      image: golang:1.21
+    steps:
+      - name: Check out Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: install dependencies
+        run: go mod download
+      - name: run tests
+        run: make tests
+
+  build:
+    name: Build internal api
+    needs: [
+      semver,
+      tests
+    ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Check out Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Tag Docker image and push to Google Artifact Registry
+        uses: docker/build-push-action@v5
+        with:
+          file: Dockerfile_internal_api
+          push: true
+          tags: |
+            ghcr.io/cafo13/animal-facts/internal-api:${{ needs.semver.outputs.version }}
+            ghcr.io/cafo13/animal-facts/internal-api:latest
+
+  tag_and_release:
+    name: Tag repo and create release
+    needs: [
+      semver,
+      build,
+    ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create Tag
+        id: create_tag
+        uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ needs.semver.outputs.version }}
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.semver.outputs.version }}
+          body: ${{ github.event.head_commit.message }}
+          prerelease: true

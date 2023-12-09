@@ -1,0 +1,9 @@
+FROM golang:1.21
+
+WORKDIR /animal-facts-internal
+
+COPY . .
+RUN go mod download && go mod verify
+RUN CGO_ENABLED=0 GOOS=linux go build -o /animal-facts-internal/api -ldflags "-s -w" cmd/internal-api/main.go
+
+CMD ["/animal-facts-internal/api"]
