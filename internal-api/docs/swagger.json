@@ -1,0 +1,20 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This API manages the facts database for the animal facts public API.",
+        "title": "Animal Facts Internal API",
+        "contact": {},
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/cafo13/animal-facts/blob/main/LICENSE"
+        },
+        "version": "VERSION_PLACEHOLDER"
+    },
+    "host": "https://animal-facts-manager.cafo.dev",
+    "basePath": "/api/v1",
+    "paths": {},
+    "externalDocs": {
+        "description": "OpenAPI",
+        "url": "https://swagger.io/resources/open-api/"
+    }
+}

@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"net/http"
 
-	"github.com/neko-neko/echo-logrus/v2/log"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -19,8 +18,6 @@ func NewService(router *router.Router) *Service {
 }
 
 func (s *Service) Run(ctx context.Context, port int) error {
-	log.Logger().Info("Server starting...")
-
 	errgrp, ctx := errgroup.WithContext(ctx)
 
 	errgrp.Go(func() error {

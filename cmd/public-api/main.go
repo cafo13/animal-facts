@@ -24,8 +24,21 @@ var (
 	mongoDbUri string
 )
 
+// @title           Animal Facts Public API
+// @version         VERSION_PLACEHOLDER
+// @description     This API provides facts about animals.
+
+// @license.name  MIT
+// @license.url   https://github.com/cafo13/animal-facts/blob/main/LICENSE
+
+// @host      https://animal-facts.cafo.dev
+// @BasePath  /api/v1
+
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
 	setupLogger()
+	log.Logger().Info("starting public animal facts api VERSION_PLACEHOLDER")
 
 	loadEnv()
 

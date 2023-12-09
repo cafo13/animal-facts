@@ -1,0 +1,100 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This API provides facts about animals.",
+        "title": "Animal Facts Public API",
+        "contact": {},
+        "license": {
+            "name": "MIT",
+            "url": "https://github.com/cafo13/animal-facts/blob/main/LICENSE"
+        },
+        "version": "VERSION_PLACEHOLDER"
+    },
+    "host": "https://animal-facts.cafo.dev",
+    "basePath": "/api/v1",
+    "paths": {
+        "/facts": {
+            "get": {
+                "description": "gets random fact from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "gets random fact",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Fact"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/facts/:id": {
+            "get": {
+                "description": "gets fact by ID from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "gets fact",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Fact"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.ErrorResult": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.Fact": {
+            "type": "object",
+            "properties": {
+                "fact": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "OpenAPI",
+        "url": "https://swagger.io/resources/open-api/"
+    }
+}
