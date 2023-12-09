@@ -1,18 +1,23 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
+	"context"
+	"github.com/cafo13/animal-facts/public-api/api"
 	"os"
+	"os/signal"
+	"strconv"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/joho/godotenv"
 	echoLog "github.com/labstack/gommon/log"
-	"github.com/neko-neko/echo-logrus/v2"
 	"github.com/neko-neko/echo-logrus/v2/log"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 
-	"github.com/cafo13/animal-facts/internal/repository"
-	"github.com/cafo13/animal-facts/internal/service"
+	"github.com/cafo13/animal-facts/pkg/repository"
+	"github.com/cafo13/animal-facts/pkg/router"
+	"github.com/cafo13/animal-facts/public-api/handler"
+	"github.com/cafo13/animal-facts/public-api/service"
 )
 
 var (
@@ -20,46 +25,56 @@ var (
 )
 
 func main() {
-	e := echo.New()
-
-	setupLogger(e)
+	setupLogger()
 
 	loadEnv()
 
 	factsRepository, err := repository.NewMongoDBFactsRepository(mongoDbUri)
 	if err != nil {
-		log.Logger().WithError(err).Fatal("failed to setup mongo db facts repository")
-		os.Exit(1)
+		panic(errors.Wrap(err, "failed to setup mongo db facts repository"))
 	}
 
-	factsHandler, err := handler.NewFactsHandler(factsRepository)
-	if err != nil {
-		log.Logger().WithError(err).Fatal("failed to setup facts handler")
-		os.Exit(1)
+	factsHandler := handler.NewFactsHandler(factsRepository)
+	factsApi := api.NewFactsApi(factsHandler)
+	factsApi.SetupRoutes()
+	factsRouter := router.NewRouter()
+	for _, route := range factsApi.GetRoutes() {
+		err := factsRouter.RegisterRoute(route)
+		if err != nil {
+			log.Logger().WithError(err).Errorf("failed to register route %s", route.Path)
+		} else {
+			log.Logger().Infof("registered route %s", route.Path)
+		}
 	}
 
-	factsRouter, err := router.NewFactsRouter(factsHandler)
-	if err != nil {
-		log.Logger().WithError(err).Fatal("failed to setup facts router")
-		os.Exit(1)
-	}
+	ctx, cancel := signal.NotifyContext(context.TODO(), os.Interrupt)
+	defer cancel()
 
 	svc := service.NewService(factsRouter)
-	err = svc.Start()
+
+	apiPortStr, ok := os.LookupEnv("API_PORT")
+	if !ok {
+		apiPortStr = "8080"
+		log.Logger().Infof("API_PORT environment variable is not set, using default value %s", apiPortStr)
+	}
+
+	apiPort, err := strconv.Atoi(apiPortStr)
 	if err != nil {
-		log.Logger().WithError(err).Fatal("failed to start service")
-		os.Exit(1)
+		panic(errors.Wrap(err, "failed to parse API_PORT environment variable, only integer values are allowed (like 80 or 8080"))
+	}
+
+	err = svc.Run(ctx, apiPort)
+	if err != nil {
+		panic(errors.Wrap(err, "failed to start service"))
 	}
 }
 
-func setupLogger(e *echo.Echo) {
+func setupLogger() {
 	log.Logger().SetOutput(os.Stdout)
 	log.Logger().SetLevel(echoLog.INFO)
 	log.Logger().SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat: time.RFC3339,
 	})
-	e.Logger = log.Logger()
-	e.Use(middleware.Logger())
 	log.Logger().Info("logger enabled")
 }
 
