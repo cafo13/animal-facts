@@ -35,7 +35,7 @@ jobs:
           major_regexp_flags: ""
           minor_pattern: "(MINOR)"
           minor_regexp_flags: ""
-          version_format: "api-v${major}.${minor}.${patch}"
+          version_format: "${major}.${minor}.${patch}"
           change_path: "cmd internal-api public-api pkg"
           bump_each_commit: true
           search_commit_body: true
