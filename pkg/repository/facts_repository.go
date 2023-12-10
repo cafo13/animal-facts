@@ -24,8 +24,10 @@ type Fact struct {
 
 type FactsRepository interface {
 	Create(fact *Fact) error
-	Get(id int) (*Fact, error)
-	Update(id int, updatedFact *Fact) error
+	ReadOne(id int) (*Fact, error)
+	ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error)
+	ReadManyIDs(filterFunc func(fact *Fact) bool) ([]int, error)
+	Update(id int, updateFunc func(fact *Fact) error) error
 	Delete(id int) error
 	Count() (int, error)
 }
@@ -63,7 +65,7 @@ func (m *MongoDBFactsRepository) Create(fact *Fact) error {
 	return errors.New("not implemented")
 }
 
-func (m *MongoDBFactsRepository) Get(id int) (*Fact, error) {
+func (m *MongoDBFactsRepository) ReadOne(id int) (*Fact, error) {
 	filter := bson.D{{"_id", id}}
 	var result Fact
 	err := m.factsCollection().FindOne(context.TODO(), filter).Decode(&result)
@@ -74,11 +76,15 @@ func (m *MongoDBFactsRepository) Get(id int) (*Fact, error) {
 	return &result, nil
 }
 
-func (m *MongoDBFactsRepository) Count() (int, error) {
-	return 1, errors.New("not implemented")
+func (m *MongoDBFactsRepository) ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error) {
+	return nil, errors.New("not implemented")
 }
 
-func (m *MongoDBFactsRepository) Update(id int, updatedFact *Fact) error {
+func (m *MongoDBFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) ([]int, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (m *MongoDBFactsRepository) Update(id int, updateFunc func(fact *Fact) error) error {
 	return errors.New("not implemented")
 }
 
@@ -86,28 +92,89 @@ func (m *MongoDBFactsRepository) Delete(id int) error {
 	return errors.New("not implemented")
 }
 
-type MockFactsRepository struct{}
+func (m *MongoDBFactsRepository) Count() (int, error) {
+	return 1, errors.New("not implemented")
+}
 
-func NewMockFactsRepository() FactsRepository {
-	return &MockFactsRepository{}
+type MockFactsRepository struct {
+	facts                 map[int]*Fact
+	errorAllFunctionCalls bool
+}
+
+func NewMockFactsRepository(facts map[int]*Fact, errorAllFunctionCalls bool) FactsRepository {
+	return &MockFactsRepository{facts, errorAllFunctionCalls}
 }
 
 func (m MockFactsRepository) Create(fact *Fact) error {
+	if m.errorAllFunctionCalls {
+		return errors.New("error at creating fact")
+	}
+
 	return nil
 }
 
-func (m MockFactsRepository) Get(id int) (*Fact, error) {
-	return nil, nil
+func (m MockFactsRepository) ReadOne(id int) (*Fact, error) {
+	if m.errorAllFunctionCalls {
+		return nil, errors.New("error at getting fact")
+	}
+
+	if fact, exists := m.facts[id]; exists {
+		return fact, nil
+	}
+
+	return nil, errors.New("fact not found")
 }
 
-func (m MockFactsRepository) Update(id int, updatedFact *Fact) error {
+func (m MockFactsRepository) ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error) {
+	if m.errorAllFunctionCalls {
+		return nil, errors.New("error at getting facts")
+	}
+
+	var matchingFacts []*Fact
+	for _, fact := range m.facts {
+		if filterFunc(fact) {
+			matchingFacts = append(matchingFacts, fact)
+		}
+	}
+
+	return matchingFacts, nil
+}
+
+func (m MockFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) ([]int, error) {
+	if m.errorAllFunctionCalls {
+		return nil, errors.New("error at getting fact IDs")
+	}
+
+	var matchingFactIDs []int
+	for id, fact := range m.facts {
+		if filterFunc(fact) {
+			matchingFactIDs = append(matchingFactIDs, id)
+		}
+	}
+
+	return matchingFactIDs, nil
+}
+
+func (m MockFactsRepository) Update(id int, updateFunc func(fact *Fact) error) error {
+	if m.errorAllFunctionCalls {
+		return errors.New("error at updating fact")
+	}
+
 	return nil
 }
 
 func (m MockFactsRepository) Delete(id int) error {
+	if m.errorAllFunctionCalls {
+		return errors.New("error at deleting fact")
+	}
+
 	return nil
 }
 
 func (m MockFactsRepository) Count() (int, error) {
-	return 0, nil
+	if m.errorAllFunctionCalls {
+		return 0, errors.New("error at getting fact count")
+	}
+
+	return len(m.facts), nil
 }

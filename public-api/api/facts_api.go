@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
@@ -18,6 +19,10 @@ var (
 
 type ErrorResult struct {
 	Error string `json:"error"`
+}
+
+type CountResult struct {
+	Count int `json:"count"`
 }
 
 type FactsApi struct {
@@ -38,6 +43,11 @@ func (f *FactsApi) SetupRoutes() {
 		},
 		{
 			Method:      "GET",
+			Path:        "/health",
+			HandlerFunc: f.GetHealth,
+		},
+		{
+			Method:      "GET",
 			Path:        fmt.Sprintf("/%s/facts", basePathV1),
 			HandlerFunc: f.GetRandomApproved,
 		},
@@ -46,11 +56,21 @@ func (f *FactsApi) SetupRoutes() {
 			Path:        fmt.Sprintf("%s/facts/:id", basePathV1),
 			HandlerFunc: f.Get,
 		},
+		{
+			Method:      "GET",
+			Path:        fmt.Sprintf("%s/facts/count", basePathV1),
+			HandlerFunc: f.GetCount,
+		},
 	}
 }
 
 func (f *FactsApi) GetRoutes() []router.Route {
 	return f.factsApiRoutes
+}
+
+func (f *FactsApi) GetHealth(c echo.Context) error {
+	// TODO check database connection for health check and maybe other connections?
+	return c.String(http.StatusOK, "Healthy")
 }
 
 // GetRandomApproved
@@ -76,5 +96,17 @@ func (f *FactsApi) GetRandomApproved(c echo.Context) error {
 //	@Failure      500  {object}  ErrorResult
 //	@Router       /facts/:id [get]
 func (f *FactsApi) Get(c echo.Context) error {
+	return errors.New("not implemented")
+}
+
+// GetCount
+//
+//	@Summary      gets fact count
+//	@Description  gets fact count from the database
+//	@Produce      json
+//	@Success      200  {object}  CountResult
+//	@Failure      500  {object}  ErrorResult
+//	@Router       /facts/count [get]
+func (f *FactsApi) GetCount(c echo.Context) error {
 	return errors.New("not implemented")
 }
