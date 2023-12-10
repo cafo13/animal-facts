@@ -42,7 +42,7 @@ jobs:
           user_format_type: "json"
 
   tests:
-    name: go tests
+    name: Tests
     runs-on: ubuntu-latest
     container:
       image: golang:1.21
@@ -144,4 +144,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.semver.outputs.version }}
           body: ${{ github.event.head_commit.message }}
-          prerelease: true
