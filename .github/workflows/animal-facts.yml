@@ -1,13 +1,19 @@
-name: animal_facts_public
+name: animal_facts
 
 on:
   push:
     branches: ["main"]
     paths:
-      - .github/workflows/animal-facts-public.yml
-      - cmd/public-api/
+      - .github/workflows/animal-facts.yml
+      - cmd/
+      - internal-api/
       - public-api/
       - pkg/
+      - Dockerfile_internal_api
+      - Dockerfile_public_api
+      - Makefile
+      - go.mod
+      - go.sum
 
 jobs:
   semver:
@@ -24,13 +30,13 @@ jobs:
         name: Git Semantic Version
         uses: PaulHatch/semantic-version@v5.3.0
         with:
-          tag_prefix: "api-v"
+          tag_prefix: "v"
           major_pattern: "(MAJOR)"
           major_regexp_flags: ""
           minor_pattern: "(MINOR)"
           minor_regexp_flags: ""
           version_format: "api-v${major}.${minor}.${patch}"
-          change_path: "cmd/public-api public-api pkg"
+          change_path: "cmd internal-api public-api pkg"
           bump_each_commit: true
           search_commit_body: true
           user_format_type: "json"
@@ -50,7 +56,7 @@ jobs:
       - name: run tests
         run: make tests
 
-  build:
+  build-public-api:
     name: Build public api
     needs: [
       semver,
@@ -81,11 +87,44 @@ jobs:
             ghcr.io/cafo13/animal-facts/public-api:${{ needs.semver.outputs.version }}
             ghcr.io/cafo13/animal-facts/public-api:latest
 
+
+  build-internal-api:
+    name: Build internal api
+    needs: [
+      semver,
+      tests
+    ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Check out Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Tag Docker image and push to Google Artifact Registry
+        uses: docker/build-push-action@v5
+        with:
+          file: Dockerfile_internal_api
+          push: true
+          tags: |
+            ghcr.io/cafo13/animal-facts/internal-api:${{ needs.semver.outputs.version }}
+            ghcr.io/cafo13/animal-facts/internal-api:latest
+
   tag_and_release:
     name: Tag repo and create release
     needs: [
       semver,
-      build,
+      build-public-api,
+      build-internal-api
     ]
     runs-on: ubuntu-latest
     steps:
