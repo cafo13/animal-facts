@@ -1,0 +1,5 @@
+mongodb/
+.gitignore
+Dockerfile*
+Makefile
+README.md

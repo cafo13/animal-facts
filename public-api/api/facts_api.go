@@ -2,10 +2,10 @@ package api
 
 import (
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"github.com/swaggo/echo-swagger"
 
 	"github.com/cafo13/animal-facts/pkg/router"
@@ -83,7 +83,13 @@ func (f *FactsApi) GetHealth(c echo.Context) error {
 //	@Failure      500  {object}  ErrorResult
 //	@Router       /facts [get]
 func (f *FactsApi) GetRandomApproved(c echo.Context) error {
-	return errors.New("not implemented")
+	fact, err := f.factsHandler.GetRandomApproved()
+	if err != nil {
+		// TODO only log error and return generic message as internal server error should not be displayed to user
+		return c.JSON(http.StatusInternalServerError, ErrorResult{Error: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, &fact)
 }
 
 // Get
@@ -96,7 +102,19 @@ func (f *FactsApi) GetRandomApproved(c echo.Context) error {
 //	@Failure      500  {object}  ErrorResult
 //	@Router       /facts/:id [get]
 func (f *FactsApi) Get(c echo.Context) error {
-	return errors.New("not implemented")
+	id := c.Param("id")
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResult{Error: "id query param is not a valid hex string"})
+	}
+	fact, err := f.factsHandler.Get(objID)
+	if err != nil {
+		// TODO check for not found error type and return 404 in this case
+		// TODO only log error and return generic message as internal server error should not be displayed to user
+		return c.JSON(http.StatusInternalServerError, ErrorResult{Error: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, &fact)
 }
 
 // GetCount
@@ -108,5 +126,11 @@ func (f *FactsApi) Get(c echo.Context) error {
 //	@Failure      500  {object}  ErrorResult
 //	@Router       /facts/count [get]
 func (f *FactsApi) GetCount(c echo.Context) error {
-	return errors.New("not implemented")
+	count, err := f.factsHandler.GetFactsCount()
+	if err != nil {
+		// TODO only log error and return generic message as internal server error should not be displayed to user
+		return c.JSON(http.StatusInternalServerError, ErrorResult{Error: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, &CountResult{Count: count})
 }

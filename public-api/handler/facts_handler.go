@@ -1,14 +1,15 @@
 package handler
 
 import (
-	"math/rand"
-
 	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"math/rand"
 
 	"github.com/cafo13/animal-facts/pkg/repository"
 )
 
 type Fact struct {
+	ID     string `bson:"id"`
 	Fact   string `bson:"fact"`
 	Source string `bson:"source"`
 }
@@ -23,12 +24,13 @@ func NewFactsHandler(factsRepository repository.FactsRepository) *FactsHandler {
 
 func (f *FactsHandler) mapFactToHandler(fact *repository.Fact) *Fact {
 	return &Fact{
+		ID:     fact.ID.Hex(),
 		Fact:   fact.Fact,
 		Source: fact.Source,
 	}
 }
 
-func (f *FactsHandler) Get(id int) (*Fact, error) {
+func (f *FactsHandler) Get(id primitive.ObjectID) (*Fact, error) {
 	repositoryFact, err := f.factsRepository.ReadOne(id)
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not get fact by ID %v", id)
@@ -39,10 +41,7 @@ func (f *FactsHandler) Get(id int) (*Fact, error) {
 
 func (f *FactsHandler) GetRandomApproved() (*Fact, error) {
 	idsOfApprovedFacts, err := f.factsRepository.ReadManyIDs(func(fact *repository.Fact) bool {
-		if fact.Approved {
-			return true
-		}
-		return false
+		return true
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get IDs of approved facts")
@@ -60,4 +59,13 @@ func (f *FactsHandler) GetRandomApproved() (*Fact, error) {
 	}
 
 	return f.mapFactToHandler(randomFact), nil
+}
+
+func (f *FactsHandler) GetFactsCount() (int, error) {
+	factsCount, err := f.factsRepository.Count()
+	if err != nil {
+		return 0, errors.Wrapf(err, "could not get facts count")
+	}
+
+	return factsCount, nil
 }

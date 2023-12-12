@@ -1,0 +1,14 @@
+# local mongodb setup for testing purposes
+version: '3'
+services:
+  mongodb:
+    image: mongodb/mongodb-community-server:6.0-ubi8
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGODB_INITDB_ROOT_USERNAME=animal-facts
+      - MONGODB_INITDB_ROOT_PASSWORD=animal-facts
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data/db
