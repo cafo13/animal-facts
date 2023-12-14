@@ -21,13 +21,25 @@ func Test_RunIntegrationTests(t *testing.T) {
 		apiPort = "8080"
 	}
 
-	_, ok = os.LookupEnv("MONGODB_URI")
+	mongoDbIntegrationTestUri, ok := os.LookupEnv("MONGODB_INTEGRATION_TEST_URI")
 	if !ok {
-		t.Error("MONGODB_URI env var needs to be set for integration tests, set it to a test database before running the tests")
+		t.Error("MONGODB_INTEGRATION_TEST_URI env var needs to be set for integration tests, set it to a test database before running the tests")
 		return
 	}
 
-	err := startPublicAPIServer(apiPort)
+	err := os.Setenv("MONGODB_URI", mongoDbIntegrationTestUri)
+	if err != nil {
+		t.Error(err, "failed to set MONGODB_URI env var for integration test runs")
+		return
+	}
+
+	err = os.Setenv("MONGODB_DATABASE", "animal-facts-integration-test")
+	if err != nil {
+		t.Error(err, "failed to set MONGODB_DATABASE env var for integration test runs")
+		return
+	}
+
+	err = startPublicAPIServer(apiPort)
 	if err != nil {
 		t.Error(err, "failed to start public api for integration test runs")
 		return
@@ -42,28 +54,28 @@ func Test_RunIntegrationTests(t *testing.T) {
 	}{
 		{
 			name:           "get count of facts in test database",
-			requestPath:    "api/vs/facts/count",
-			wantResponse:   `{ "count": 5 }`,
+			requestPath:    "api/v1/facts/count",
+			wantResponse:   `{ "count": 6 }`,
 			wantHttpStatus: http.StatusOK,
 			wantErr:        false,
 		},
 		{
 			name:           "get fact by id from test database",
-			requestPath:    "api/vs/facts/3",
-			wantResponse:   `{ "fact": "The Blue Whale is the largest animal that has ever lived.", "source": "https://factanimal.com/blue-whale/" }`,
+			requestPath:    "api/v1/facts/6578bf140e487ecc049c7594",
+			wantResponse:   `{ "id": "6578bf140e487ecc049c7594", fact": "The Blue Whale is the largest animal that has ever lived.", "source": "https://factanimal.com/blue-whale/" }`,
 			wantHttpStatus: http.StatusOK,
 			wantErr:        false,
 		},
 		{
 			name:           "get random fact from test database",
-			requestPath:    "api/vs/facts",
+			requestPath:    "api/v1/facts",
 			wantHttpStatus: http.StatusOK,
 			wantErr:        false,
 		},
 		{
 			name:           "get not found status on trying to get fact with id that not exists in test database",
-			requestPath:    "api/vs/facts/999",
-			wantResponse:   `{ "error": "fact with ID 999 not found" }`,
+			requestPath:    "api/v1/facts/999",
+			wantResponse:   `{ "error": "fact with ID '999' not found" }`,
 			wantHttpStatus: http.StatusNotFound,
 			wantErr:        false,
 		},
@@ -105,12 +117,14 @@ func startPublicAPIServer(apiPort string) error {
 		case <-timeout:
 			return errors.New("timed out while waiting for public api server to return http status 200 at /Health")
 		case <-tick:
-			req, _ := http.NewRequest("GET", fmt.Sprintf("http://localhost:%s/Health", apiPort), nil)
+			req, _ := http.NewRequest("GET", fmt.Sprintf("http://localhost:%s/health", apiPort), nil)
 			resp, _ := http.DefaultClient.Do(req)
-			if resp.StatusCode == http.StatusOK {
-				return nil
+			if resp != nil {
+				if resp.StatusCode == http.StatusOK {
+					return nil
+				}
+				_ = resp.Body.Close()
 			}
-			_ = resp.Body.Close()
 		}
 	}
 }

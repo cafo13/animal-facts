@@ -57,7 +57,7 @@ jobs:
       - name: install dependencies
         run: go mod download
       - name: run tests
-        run: make tests
+        run: make test
 
   build-public-api:
     name: Build public api

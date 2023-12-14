@@ -1,5 +1,0 @@
-[
-  {"_id":{"$oid":"6578d2162274326737a693f6"},"fact":"The Blue Whale is the largest animal that has ever lived.","source":"https://factanimal.com/blue-whale/","approved":true,"created_at":{"$date":{"$numberLong":"1702412052088"}},"created_by":"cafo13","updated_at":{"$date":{"$numberLong":"1702412052088"}},"updated_by":"cafo13"},
-  {"_id":{"$oid":"6578bf160e487ecc049c7596"},"fact":"The Cheetah is the fastest land animal on the planet.","source":"https://factanimal.com/cheetahs/","approved":true,"created_at":{"$date":{"$numberLong":"1702412054150"}},"created_by":"cafo13","updated_at":{"$date":{"$numberLong":"1702412054150"}},"updated_by":"cafo13"},
-  {"_id":{"$oid":"6578bfbadb8b31d99de2a948"},"fact":"Penguins are flightless, aquatic birds that spend half their lives in water, and on land.","source":"https://factanimal.com/penguins/","approved":true,"created_at":{"$date":{"$numberLong":"1702412219340"}},"created_by":"cafo13","updated_at":{"$date":{"$numberLong":"1702412219879"}},"updated_by":"cafo13"}
-]

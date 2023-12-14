@@ -105,7 +105,7 @@ func (f *FactsApi) Get(c echo.Context) error {
 	id := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorResult{Error: "id query param is not a valid hex string"})
+		return c.JSON(http.StatusBadRequest, ErrorResult{Error: "id query param is not a valid object id in hex string format"})
 	}
 	fact, err := f.factsHandler.Get(objID)
 	if err != nil {

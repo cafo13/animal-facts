@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"os"
 	"time"
 
 	"github.com/neko-neko/echo-logrus/v2/log"
@@ -36,6 +37,7 @@ type FactsRepository interface {
 
 type MongoDBFactsRepository struct {
 	mongoDbClient *mongo.Client
+	databaseName  string
 }
 
 func NewMongoDBFactsRepository(mongoDbUri string) (FactsRepository, error) {
@@ -45,16 +47,24 @@ func NewMongoDBFactsRepository(mongoDbUri string) (FactsRepository, error) {
 		return nil, err
 	}
 
-	if err := client.Database("animal-facts").RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
+	databaseName := "animal-facts"
+
+	databaseNameFromEnv, exists := os.LookupEnv("MONGODB_DATABASE_NAME")
+	if exists {
+		databaseName = databaseNameFromEnv
+	}
+
+	log.Logger().Info("using database name: " + databaseName)
+	if err := client.Database(databaseName).RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
 		return nil, errors.Wrap(err, "failed to ping mongo db")
 	}
 	log.Logger().Info("connected to mongo db")
 
-	return &MongoDBFactsRepository{client}, nil
+	return &MongoDBFactsRepository{client, databaseName}, nil
 }
 
 func (m *MongoDBFactsRepository) factsCollection() *mongo.Collection {
-	return m.mongoDbClient.Database("animal-facts").Collection("facts")
+	return m.mongoDbClient.Database(m.databaseName).Collection("facts")
 }
 
 func (m *MongoDBFactsRepository) Create(fact *Fact) error {
@@ -107,7 +117,18 @@ func (m *MongoDBFactsRepository) Delete(id primitive.ObjectID) error {
 }
 
 func (m *MongoDBFactsRepository) Count() (int, error) {
-	return 1, errors.New("not implemented")
+	filter := bson.D{{"approved", true}}
+	var facts []Fact
+	cursor, err := m.factsCollection().Find(context.TODO(), filter)
+	if err != nil {
+		return 0, err
+	}
+
+	if err = cursor.All(context.TODO(), &facts); err != nil {
+		return 0, err
+	}
+
+	return len(facts), nil
 }
 
 func (m *MongoDBFactsRepository) Close() error {
@@ -128,7 +149,7 @@ func NewMockFactsRepository(facts map[primitive.ObjectID]*Fact, errorAllFunction
 	return &MockFactsRepository{facts, errorAllFunctionCalls}
 }
 
-func (m MockFactsRepository) Create(fact *Fact) error {
+func (m *MockFactsRepository) Create(fact *Fact) error {
 	if m.errorAllFunctionCalls {
 		return errors.New("error at creating fact")
 	}
@@ -136,7 +157,7 @@ func (m MockFactsRepository) Create(fact *Fact) error {
 	return nil
 }
 
-func (m MockFactsRepository) ReadOne(id primitive.ObjectID) (*Fact, error) {
+func (m *MockFactsRepository) ReadOne(id primitive.ObjectID) (*Fact, error) {
 	if m.errorAllFunctionCalls {
 		return nil, errors.New("error at getting fact")
 	}
@@ -148,7 +169,7 @@ func (m MockFactsRepository) ReadOne(id primitive.ObjectID) (*Fact, error) {
 	return nil, errors.New("fact not found")
 }
 
-func (m MockFactsRepository) ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error) {
+func (m *MockFactsRepository) ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error) {
 	if m.errorAllFunctionCalls {
 		return nil, errors.New("error at getting facts")
 	}
@@ -163,7 +184,7 @@ func (m MockFactsRepository) ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact
 	return matchingFacts, nil
 }
 
-func (m MockFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) ([]primitive.ObjectID, error) {
+func (m *MockFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) ([]primitive.ObjectID, error) {
 	if m.errorAllFunctionCalls {
 		return nil, errors.New("error at getting fact IDs")
 	}
@@ -178,7 +199,7 @@ func (m MockFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) ([]pr
 	return matchingFactIDs, nil
 }
 
-func (m MockFactsRepository) Update(id primitive.ObjectID, updateFunc func(fact *Fact) error) error {
+func (m *MockFactsRepository) Update(id primitive.ObjectID, updateFunc func(fact *Fact) error) error {
 	if m.errorAllFunctionCalls {
 		return errors.New("error at updating fact")
 	}
@@ -186,7 +207,7 @@ func (m MockFactsRepository) Update(id primitive.ObjectID, updateFunc func(fact 
 	return nil
 }
 
-func (m MockFactsRepository) Delete(id primitive.ObjectID) error {
+func (m *MockFactsRepository) Delete(id primitive.ObjectID) error {
 	if m.errorAllFunctionCalls {
 		return errors.New("error at deleting fact")
 	}
@@ -194,7 +215,7 @@ func (m MockFactsRepository) Delete(id primitive.ObjectID) error {
 	return nil
 }
 
-func (m MockFactsRepository) Count() (int, error) {
+func (m *MockFactsRepository) Count() (int, error) {
 	if m.errorAllFunctionCalls {
 		return 0, errors.New("error at getting fact count")
 	}

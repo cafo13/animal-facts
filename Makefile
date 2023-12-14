@@ -1,7 +1,7 @@
 CGO_ENABLED=0
 GOOS=linux
 
-tests:
+test:
 	go test ./... --tags integration
 
 internal-api-generate-swagger:

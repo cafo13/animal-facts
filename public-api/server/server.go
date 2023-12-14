@@ -73,7 +73,7 @@ func loadEnv() {
 	log.Logger().Info("loading environment variables")
 	err := godotenv.Load()
 	if err != nil {
-		log.Warn("failed to load .env file")
+		log.Logger().WithError(err).Warn("failed to load .env file")
 	}
 
 	var ok bool
