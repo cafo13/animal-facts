@@ -17,10 +17,14 @@ import (
 )
 
 func Test_RunIntegrationTests(t *testing.T) {
-	// making sure that API_PORT and MONGODB_URI are set for integration test setup
 	apiPort, ok := os.LookupEnv("API_PORT")
 	if !ok {
 		apiPort = "8080"
+	}
+
+	hostname, ok := os.LookupEnv("INTEGRATION_TEST_HOSTNAME")
+	if !ok {
+		hostname = "localhost"
 	}
 
 	err := os.Setenv("MONGODB_DATABASE", "animal-facts-integration-test")
@@ -29,7 +33,7 @@ func Test_RunIntegrationTests(t *testing.T) {
 		return
 	}
 
-	err = startPublicAPIServer(apiPort)
+	err = startPublicAPIServer(hostname, apiPort)
 	if err != nil {
 		t.Error(err, "failed to start public api for integration test runs")
 		return
@@ -95,7 +99,7 @@ func Test_RunIntegrationTests(t *testing.T) {
 	}
 }
 
-func startPublicAPIServer(apiPort string) error {
+func startPublicAPIServer(hostname, apiPort string) error {
 	go server.Run()
 
 	timeout := time.After(60 * time.Second)
@@ -105,7 +109,7 @@ func startPublicAPIServer(apiPort string) error {
 		case <-timeout:
 			return errors.New("timed out while waiting for public api server to return http status 200 at /Health")
 		case <-tick:
-			req, _ := http.NewRequest("GET", fmt.Sprintf("http://127.0.0.1:%s/health", apiPort), nil)
+			req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%s/health", hostname, apiPort), nil)
 			resp, _ := http.DefaultClient.Do(req)
 			if resp != nil {
 				if resp.StatusCode == http.StatusOK {
