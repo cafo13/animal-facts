@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -21,19 +23,7 @@ func Test_RunIntegrationTests(t *testing.T) {
 		apiPort = "8080"
 	}
 
-	mongoDbIntegrationTestUri, ok := os.LookupEnv("MONGODB_INTEGRATION_TEST_URI")
-	if !ok {
-		t.Error("MONGODB_INTEGRATION_TEST_URI env var needs to be set for integration tests, set it to a test database before running the tests")
-		return
-	}
-
-	err := os.Setenv("MONGODB_URI", mongoDbIntegrationTestUri)
-	if err != nil {
-		t.Error(err, "failed to set MONGODB_URI env var for integration test runs")
-		return
-	}
-
-	err = os.Setenv("MONGODB_DATABASE", "animal-facts-integration-test")
+	err := os.Setenv("MONGODB_DATABASE", "animal-facts-integration-test")
 	if err != nil {
 		t.Error(err, "failed to set MONGODB_DATABASE env var for integration test runs")
 		return
@@ -55,14 +45,14 @@ func Test_RunIntegrationTests(t *testing.T) {
 		{
 			name:           "get count of facts in test database",
 			requestPath:    "api/v1/facts/count",
-			wantResponse:   `{ "count": 6 }`,
+			wantResponse:   `{"count":3}`,
 			wantHttpStatus: http.StatusOK,
 			wantErr:        false,
 		},
 		{
 			name:           "get fact by id from test database",
 			requestPath:    "api/v1/facts/6578bf140e487ecc049c7594",
-			wantResponse:   `{ "id": "6578bf140e487ecc049c7594", fact": "The Blue Whale is the largest animal that has ever lived.", "source": "https://factanimal.com/blue-whale/" }`,
+			wantResponse:   `{"id":"6578bf140e487ecc049c7594","fact":"The Blue Whale is the largest animal that has ever lived.","source":"https://factanimal.com/blue-whale/"}`,
 			wantHttpStatus: http.StatusOK,
 			wantErr:        false,
 		},
@@ -74,8 +64,8 @@ func Test_RunIntegrationTests(t *testing.T) {
 		},
 		{
 			name:           "get not found status on trying to get fact with id that not exists in test database",
-			requestPath:    "api/v1/facts/999",
-			wantResponse:   `{ "error": "fact with ID '999' not found" }`,
+			requestPath:    "api/v1/facts/507f1f77bcf86cd799439011",
+			wantResponse:   `{"error":"fact with ID '507f1f77bcf86cd799439011' not found"}`,
 			wantHttpStatus: http.StatusNotFound,
 			wantErr:        false,
 		},
@@ -93,7 +83,8 @@ func Test_RunIntegrationTests(t *testing.T) {
 			if tt.wantResponse != "" {
 				body := make([]byte, resp.ContentLength)
 				_, _ = resp.Body.Read(body)
-				if string(body) != tt.wantResponse {
+				stringBody := strings.TrimSuffix(string(body), "\n")
+				if !reflect.DeepEqual(stringBody, tt.wantResponse) {
 					t.Errorf("got response %s, want %s", string(body), tt.wantResponse)
 					return
 				}
@@ -102,9 +93,6 @@ func Test_RunIntegrationTests(t *testing.T) {
 			_ = resp.Body.Close()
 		})
 	}
-
-	t.Log("create test")
-	t.Fail()
 }
 
 func startPublicAPIServer(apiPort string) error {

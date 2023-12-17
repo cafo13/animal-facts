@@ -13,6 +13,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var (
+	ErrNotFound = errors.New("fact not found")
+)
+
 type Fact struct {
 	ID        primitive.ObjectID `bson:"_id"`
 	Fact      string             `bson:"fact"`
@@ -75,7 +79,9 @@ func (m *MongoDBFactsRepository) ReadOne(id primitive.ObjectID) (*Fact, error) {
 	filter := bson.D{{"_id", id}, {"approved", true}}
 	var result Fact
 	err := m.factsCollection().FindOne(context.TODO(), filter).Decode(&result)
-	if err != nil {
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, ErrNotFound
+	} else if err != nil {
 		return nil, err
 	}
 

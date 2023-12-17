@@ -8,10 +8,14 @@ import (
 	"github.com/cafo13/animal-facts/pkg/repository"
 )
 
+var (
+	ErrNotFound = errors.New("fact not found")
+)
+
 type Fact struct {
-	ID     string `bson:"id"`
-	Fact   string `bson:"fact"`
-	Source string `bson:"source"`
+	ID     string `bson:"id" json:"id"`
+	Fact   string `bson:"fact" json:"fact"`
+	Source string `bson:"source" json:"source"`
 }
 
 type FactsHandler struct {
@@ -32,7 +36,9 @@ func (f *FactsHandler) mapFactToHandler(fact *repository.Fact) *Fact {
 
 func (f *FactsHandler) Get(id primitive.ObjectID) (*Fact, error) {
 	repositoryFact, err := f.factsRepository.ReadOne(id)
-	if err != nil {
+	if errors.Is(err, repository.ErrNotFound) {
+		return nil, ErrNotFound
+	} else if err != nil {
 		return nil, errors.Wrapf(err, "could not get fact by ID %v", id)
 	}
 

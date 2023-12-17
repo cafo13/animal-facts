@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 
@@ -108,8 +109,9 @@ func (f *FactsApi) Get(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorResult{Error: "id query param is not a valid object id in hex string format"})
 	}
 	fact, err := f.factsHandler.Get(objID)
-	if err != nil {
-		// TODO check for not found error type and return 404 in this case
+	if errors.Is(err, handler.ErrNotFound) {
+		return c.JSON(http.StatusNotFound, ErrorResult{Error: fmt.Sprintf("fact with ID '%s' not found", id)})
+	} else if err != nil {
 		// TODO only log error and return generic message as internal server error should not be displayed to user
 		return c.JSON(http.StatusInternalServerError, ErrorResult{Error: err.Error()})
 	}
