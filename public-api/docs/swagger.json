@@ -70,9 +70,40 @@
                     }
                 }
             }
+        },
+        "/facts/count": {
+            "get": {
+                "description": "gets fact count from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "gets fact count",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api.CountResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "api.CountResult": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
         "api.ErrorResult": {
             "type": "object",
             "properties": {

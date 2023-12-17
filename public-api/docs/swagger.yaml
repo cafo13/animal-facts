@@ -1,5 +1,10 @@
 basePath: /api/v1
 definitions:
+  api.CountResult:
+    properties:
+      count:
+        type: integer
+    type: object
   api.ErrorResult:
     properties:
       error:
@@ -63,4 +68,19 @@ paths:
           schema:
             $ref: '#/definitions/api.ErrorResult'
       summary: gets fact
+  /facts/count:
+    get:
+      description: gets fact count from the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.CountResult'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResult'
+      summary: gets fact count
 swagger: "2.0"
