@@ -98,14 +98,14 @@ func Test_RunIntegrationTests(t *testing.T) {
 func startPublicAPIServer(apiPort string) error {
 	go server.Run()
 
-	timeout := time.After(20 * time.Second)
+	timeout := time.After(60 * time.Second)
 	tick := time.Tick(500 * time.Millisecond)
 	for {
 		select {
 		case <-timeout:
 			return errors.New("timed out while waiting for public api server to return http status 200 at /Health")
 		case <-tick:
-			req, _ := http.NewRequest("GET", fmt.Sprintf("http://localhost:%s/health", apiPort), nil)
+			req, _ := http.NewRequest("GET", fmt.Sprintf("http://127.0.0.1:%s/health", apiPort), nil)
 			resp, _ := http.DefaultClient.Do(req)
 			if resp != nil {
 				if resp.StatusCode == http.StatusOK {

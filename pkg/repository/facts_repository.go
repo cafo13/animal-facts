@@ -58,7 +58,7 @@ func NewMongoDBFactsRepository(mongoDbUri string) (FactsRepository, error) {
 		databaseName = databaseNameFromEnv
 	}
 
-	log.Logger().Info("using database name: " + databaseName)
+	log.Logger().Info("using database: " + databaseName)
 	if err := client.Database(databaseName).RunCommand(context.TODO(), bson.D{{"ping", 1}}).Err(); err != nil {
 		return nil, errors.Wrap(err, "failed to ping mongo db")
 	}
