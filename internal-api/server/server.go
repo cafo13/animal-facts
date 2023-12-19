@@ -10,12 +10,12 @@ import (
 	"github.com/neko-neko/echo-logrus/v2/log"
 	"github.com/pkg/errors"
 
+	"github.com/cafo13/animal-facts/internal-api/api"
+	"github.com/cafo13/animal-facts/internal-api/handler"
 	logger "github.com/cafo13/animal-facts/pkg/log"
 	"github.com/cafo13/animal-facts/pkg/repository"
 	"github.com/cafo13/animal-facts/pkg/router"
-	"github.com/cafo13/animal-facts/public-api/api"
-	"github.com/cafo13/animal-facts/public-api/handler"
-	"github.com/cafo13/animal-facts/public-api/service"
+	"github.com/cafo13/animal-facts/pkg/service"
 )
 
 var (
@@ -24,21 +24,21 @@ var (
 
 // Run
 //
-// @title           Animal Facts Public API
+// @title           Animal Facts Internal API
 // @version         VERSION_PLACEHOLDER
 // @description     This API provides facts about animals.
 //
 // @license.name  MIT
 // @license.url   https://github.com/cafo13/animal-facts/blob/main/LICENSE
 //
-// @host      https://animal-facts.cafo.dev
+// @host      https://animal-facts-manager.cafo.dev
 // @BasePath  /api/v1
 //
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func Run() {
 	logger.SetupLogger()
-	log.Logger().Info("starting public animal facts api VERSION_PLACEHOLDER")
+	log.Logger().Info("starting internal animal facts api VERSION_PLACEHOLDER")
 
 	loadEnv()
 

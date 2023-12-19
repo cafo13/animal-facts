@@ -3,7 +3,7 @@ package handler
 import (
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"math/rand"
+	"time"
 
 	"github.com/cafo13/animal-facts/pkg/repository"
 )
@@ -13,9 +13,10 @@ var (
 )
 
 type Fact struct {
-	ID     string `bson:"id" json:"id"`
-	Fact   string `bson:"fact" json:"fact"`
-	Source string `bson:"source" json:"source"`
+	ID       primitive.ObjectID `json:"id"`
+	Fact     string             `json:"fact"`
+	Source   string             `json:"source"`
+	Approved bool               `json:"approved"`
 }
 
 type FactsHandler struct {
@@ -28,50 +29,36 @@ func NewFactsHandler(factsRepository repository.FactsRepository) *FactsHandler {
 
 func (f *FactsHandler) mapFactToHandler(fact *repository.Fact) *Fact {
 	return &Fact{
-		ID:     fact.ID.Hex(),
+		ID:     fact.ID,
 		Fact:   fact.Fact,
 		Source: fact.Source,
 	}
 }
 
-func (f *FactsHandler) Get(id primitive.ObjectID) (*Fact, error) {
-	repositoryFact, err := f.factsRepository.ReadOne(id)
-	if errors.Is(err, repository.ErrNotFound) {
-		return nil, ErrNotFound
-	} else if err != nil {
-		return nil, errors.Wrapf(err, "could not get fact by ID %v", id)
+func (f *FactsHandler) Create(fact *Fact) error {
+	factToCreate := &repository.Fact{
+		ID:        fact.ID,
+		Fact:      fact.Fact,
+		Source:    fact.Source,
+		Approved:  fact.Approved,
+		CreatedAt: time.Now(),
+		CreatedBy: "user.name", // TODO set user name
+		UpdatedAt: time.Now(),
+		UpdatedBy: "user.name", // TODO set user name
 	}
 
-	return f.mapFactToHandler(repositoryFact), nil
+	err := f.factsRepository.Create(factToCreate)
+	if err != nil {
+		return errors.Wrapf(err, "failed to create fact")
+	}
+
+	return nil
 }
 
-func (f *FactsHandler) GetRandomApproved() (*Fact, error) {
-	idsOfApprovedFacts, err := f.factsRepository.ReadManyIDs(func(fact *repository.Fact) bool {
-		return true
-	})
-	if err != nil {
-		return nil, errors.Wrap(err, "could not get IDs of approved facts")
-	}
-
-	if len(idsOfApprovedFacts) == 0 {
-		return nil, errors.New("no approved facts found")
-	}
-
-	randomFactId := idsOfApprovedFacts[rand.Intn(len(idsOfApprovedFacts))]
-
-	randomFact, err := f.factsRepository.ReadOne(randomFactId)
-	if err != nil {
-		return nil, errors.Wrapf(err, "could not get random fact by ID %v", randomFactId)
-	}
-
-	return f.mapFactToHandler(randomFact), nil
+func (f *FactsHandler) Update(fact *Fact) error {
+	return errors.New("not implemented")
 }
 
-func (f *FactsHandler) GetFactsCount() (int, error) {
-	factsCount, err := f.factsRepository.Count()
-	if err != nil {
-		return 0, errors.Wrapf(err, "could not get facts count")
-	}
-
-	return factsCount, nil
+func (f *FactsHandler) Delete(id primitive.ObjectID) error {
+	return errors.New("not implemented")
 }
