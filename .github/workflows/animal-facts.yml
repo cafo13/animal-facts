@@ -5,10 +5,10 @@ on:
     branches: ["main"]
     paths:
       - .github/workflows/animal-facts.yml
-      - cmd/
-      - internal-api/
-      - public-api/
-      - pkg/
+      - cmd/**
+      - internal-api/**
+      - public-api/**
+      - pkg/**
       - Dockerfile_internal_api
       - Dockerfile_public_api
       - Makefile
