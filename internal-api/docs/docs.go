@@ -18,7 +18,133 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {},
+    "paths": {
+        "/facts": {
+            "post": {
+                "description": "create a new fact",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "create fact",
+                "parameters": [
+                    {
+                        "description": "fact",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateUpdateFact"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "fact created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/facts/:id": {
+            "put": {
+                "description": "update an existing fact",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "update fact",
+                "parameters": [
+                    {
+                        "description": "fact",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.CreateUpdateFact"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "fact updated",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete an existing fact",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "delete fact",
+                "responses": {
+                    "200": {
+                        "description": "fact deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.CreateUpdateFact": {
+            "type": "object",
+            "properties": {
+                "approved": {
+                    "type": "boolean"
+                },
+                "fact": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.ErrorResult": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        }
+    },
     "externalDocs": {
         "description": "OpenAPI",
         "url": "https://swagger.io/resources/open-api/"
@@ -32,7 +158,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
 	Title:            "Animal Facts Internal API",
-	Description:      "This API manages the facts database for the animal facts public API.",
+	Description:      "This API provides facts about animals.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

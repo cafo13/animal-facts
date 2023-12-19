@@ -124,6 +124,9 @@ const docTemplate = `{
                 "fact": {
                     "type": "string"
                 },
+                "id": {
+                    "type": "string"
+                },
                 "source": {
                     "type": "string"
                 }
