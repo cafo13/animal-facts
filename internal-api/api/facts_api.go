@@ -45,22 +45,22 @@ func (f *FactsApi) SetupRoutes() {
 		{
 			Method:      "GET",
 			Path:        "/health",
-			HandlerFunc: f.getHealth,
+			HandlerFunc: f.GetHealth,
 		},
 		{
 			Method:      "GET",
 			Path:        fmt.Sprintf("/%s/facts", basePathV1),
-			HandlerFunc: f.getRandomApproved,
+			HandlerFunc: f.GetRandomApproved,
 		},
 		{
 			Method:      "GET",
 			Path:        fmt.Sprintf("%s/facts/:id", basePathV1),
-			HandlerFunc: f.get,
+			HandlerFunc: f.Get,
 		},
 		{
 			Method:      "GET",
 			Path:        fmt.Sprintf("%s/facts/count", basePathV1),
-			HandlerFunc: f.getCount,
+			HandlerFunc: f.GetCount,
 		},
 	}
 }
@@ -69,12 +69,12 @@ func (f *FactsApi) GetRoutes() []router.Route {
 	return f.factsApiRoutes
 }
 
-func (f *FactsApi) getHealth(c echo.Context) error {
+func (f *FactsApi) GetHealth(c echo.Context) error {
 	// TODO check database connection for health check and maybe other connections?
 	return c.String(http.StatusOK, "Healthy")
 }
 
-// getRandomApproved
+// GetRandomApproved
 //
 //	@Summary      gets random fact
 //	@Description  gets random fact from the database
@@ -83,7 +83,7 @@ func (f *FactsApi) getHealth(c echo.Context) error {
 //	@Failure      404  {object}  ErrorResult
 //	@Failure      500  {object}  ErrorResult
 //	@Router       /facts [get]
-func (f *FactsApi) getRandomApproved(c echo.Context) error {
+func (f *FactsApi) GetRandomApproved(c echo.Context) error {
 	fact, err := f.factsHandler.GetRandomApproved()
 	if err != nil {
 		// TODO only log error and return generic message as internal server error should not be displayed to user
@@ -93,7 +93,7 @@ func (f *FactsApi) getRandomApproved(c echo.Context) error {
 	return c.JSON(http.StatusOK, &fact)
 }
 
-// get
+// Get
 //
 //	@Summary      gets fact
 //	@Description  gets fact by ID from the database
@@ -102,11 +102,11 @@ func (f *FactsApi) getRandomApproved(c echo.Context) error {
 //	@Failure      404  {object}  ErrorResult
 //	@Failure      500  {object}  ErrorResult
 //	@Router       /facts/:id [get]
-func (f *FactsApi) get(c echo.Context) error {
+func (f *FactsApi) Get(c echo.Context) error {
 	id := c.Param("id")
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorResult{Error: "id from request path is not a valid object id in hex string format"})
+		return c.JSON(http.StatusBadRequest, ErrorResult{Error: "id query param is not a valid object id in hex string format"})
 	}
 	fact, err := f.factsHandler.Get(objID)
 	if errors.Is(err, handler.ErrNotFound) {
@@ -119,7 +119,7 @@ func (f *FactsApi) get(c echo.Context) error {
 	return c.JSON(http.StatusOK, &fact)
 }
 
-// getCount
+// GetCount
 //
 //	@Summary      gets fact count
 //	@Description  gets fact count from the database
@@ -127,7 +127,7 @@ func (f *FactsApi) get(c echo.Context) error {
 //	@Success      200  {object}  CountResult
 //	@Failure      500  {object}  ErrorResult
 //	@Router       /facts/count [get]
-func (f *FactsApi) getCount(c echo.Context) error {
+func (f *FactsApi) GetCount(c echo.Context) error {
 	count, err := f.factsHandler.GetFactsCount()
 	if err != nil {
 		// TODO only log error and return generic message as internal server error should not be displayed to user

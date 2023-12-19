@@ -193,11 +193,11 @@ func TestFactsHandler_GetRandomApproved(t *testing.T) {
 			f := handler.NewFactsHandler(tt.fields.factsRepository)
 			got, err := f.GetRandomApproved()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetRandomApproved() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("getRandomApproved() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetRandomApproved() got = %v, want %v", got, tt.want)
+				t.Errorf("getRandomApproved() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

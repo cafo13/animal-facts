@@ -47,8 +47,6 @@ jobs:
     container:
       image: golang:1.21
     env:
-      INTEGRATION_TEST_HOSTNAME: golang
-      API_PORT: 8080
       MONGODB_URI: ${{secrets.MONGODB_URI}}
       MONGODB_DATABASE_NAME: ${{secrets.MONGODB_DATABASE_NAME}}
     steps:

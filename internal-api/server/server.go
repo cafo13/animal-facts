@@ -13,9 +13,9 @@ import (
 	logger "github.com/cafo13/animal-facts/pkg/log"
 	"github.com/cafo13/animal-facts/pkg/repository"
 	"github.com/cafo13/animal-facts/pkg/router"
-	"github.com/cafo13/animal-facts/pkg/service"
 	"github.com/cafo13/animal-facts/public-api/api"
 	"github.com/cafo13/animal-facts/public-api/handler"
+	"github.com/cafo13/animal-facts/public-api/service"
 )
 
 var (

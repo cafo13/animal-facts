@@ -13,9 +13,9 @@ var (
 )
 
 type Fact struct {
-	ID     string `json:"id"`
-	Fact   string `json:"fact"`
-	Source string `json:"source"`
+	ID     string `bson:"id" json:"id"`
+	Fact   string `bson:"fact" json:"fact"`
+	Source string `bson:"source" json:"source"`
 }
 
 type FactsHandler struct {
