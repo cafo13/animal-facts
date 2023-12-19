@@ -3,6 +3,7 @@
 package api
 
 import (
+	"github.com/pkg/errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,10 +16,27 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Test_RunApiIntegrationTests_getCount(t *testing.T) {
+func getFactsApi() (*FactsApi, error) {
 	mongoDbUri, ok := os.LookupEnv("MONGODB_URI")
 	if !ok {
-		t.Error("MONGODB_URI environment variable is not set, set it to a test database before running the integration tests")
+		return nil, errors.New("MONGODB_URI environment variable is not set, set it to a test database before running the integration tests")
+	}
+
+	fatsRepository, err := repository.NewMongoDBFactsRepository(mongoDbUri)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to setup repository for integration tests")
+	}
+
+	factsHandler := handler.NewFactsHandler(fatsRepository)
+	factsApi := NewFactsApi(factsHandler)
+	return factsApi, nil
+}
+
+func Test_RunApiIntegrationTests_getCount(t *testing.T) {
+	factsApi, err := getFactsApi()
+	if err != nil {
+		t.Error(err)
+		return
 	}
 
 	tests := []struct {
@@ -41,10 +59,6 @@ func Test_RunApiIntegrationTests_getCount(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			fatsRepository, _ := repository.NewMongoDBFactsRepository(mongoDbUri)
-			factsHandler := handler.NewFactsHandler(fatsRepository)
-			factsApi := NewFactsApi(factsHandler)
-
 			gotErr := factsApi.getCount(c)
 			if (gotErr != nil) != tt.wantErr {
 				t.Errorf("RunApiIntegrationTests_getCount() error = %v, wantErr = %v", gotErr, tt.wantErr)
@@ -66,9 +80,10 @@ func Test_RunApiIntegrationTests_getCount(t *testing.T) {
 }
 
 func Test_RunApiIntegrationTests_get(t *testing.T) {
-	mongoDbUri, ok := os.LookupEnv("MONGODB_URI")
-	if !ok {
-		t.Error("MONGODB_URI environment variable is not set, set it to a test database before running the integration tests")
+	factsApi, err := getFactsApi()
+	if err != nil {
+		t.Error(err)
+		return
 	}
 
 	tests := []struct {
@@ -102,10 +117,6 @@ func Test_RunApiIntegrationTests_get(t *testing.T) {
 			c.SetParamNames("id")
 			c.SetParamValues(tt.requestFactID)
 
-			fatsRepository, _ := repository.NewMongoDBFactsRepository(mongoDbUri)
-			factsHandler := handler.NewFactsHandler(fatsRepository)
-			factsApi := NewFactsApi(factsHandler)
-
 			gotErr := factsApi.get(c)
 			if (gotErr != nil) != tt.wantErr {
 				t.Errorf("RunApiIntegrationTests_get() error = %v, wantErr = %v", gotErr, tt.wantErr)
@@ -127,9 +138,10 @@ func Test_RunApiIntegrationTests_get(t *testing.T) {
 }
 
 func Test_RunApiIntegrationTests_getRandomApproved(t *testing.T) {
-	mongoDbUri, ok := os.LookupEnv("MONGODB_URI")
-	if !ok {
-		t.Error("MONGODB_URI environment variable is not set, set it to a test database before running the integration tests")
+	factsApi, err := getFactsApi()
+	if err != nil {
+		t.Error(err)
+		return
 	}
 
 	tests := []struct {
@@ -149,10 +161,6 @@ func Test_RunApiIntegrationTests_getRandomApproved(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-
-			fatsRepository, _ := repository.NewMongoDBFactsRepository(mongoDbUri)
-			factsHandler := handler.NewFactsHandler(fatsRepository)
-			factsApi := NewFactsApi(factsHandler)
 
 			gotErr := factsApi.getRandomApproved(c)
 			if (gotErr != nil) != tt.wantErr {
