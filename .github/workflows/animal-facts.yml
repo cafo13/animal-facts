@@ -78,7 +78,9 @@ jobs:
       - name: replace version
         run: sed -i "s/VERSION_PLACEHOLDER/${{ needs.semver.outputs.version }}/g" public-api/server/server.go
       - name: update swagger
-        run: make public-api-generate-swagger
+        run: |
+          make install-swag
+          make public-api-generate-swagger
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -114,7 +116,9 @@ jobs:
       - name: replace version
         run: sed -i "s/VERSION_PLACEHOLDER/${{ needs.semver.outputs.version }}/g" internal-api/server/server.go
       - name: update swagger
-        run: make internal-api-generate-swagger
+        run: |
+          make install-swag
+          make public-api-generate-swagger
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:

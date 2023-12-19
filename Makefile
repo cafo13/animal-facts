@@ -1,6 +1,9 @@
 CGO_ENABLED=0
 GOOS=linux
 
+install-swag:
+	go install github.com/swaggo/swag/cmd/swag@latest
+
 test:
 	go test ./... --tags integration
 
