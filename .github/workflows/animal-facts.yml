@@ -77,6 +77,10 @@ jobs:
           fetch-depth: 0
       - name: replace version
         run: sed -i "s/VERSION_PLACEHOLDER/${{ needs.semver.outputs.version }}/g" public-api/server/server.go
+      - name: Setup Go 1.21.x
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
       - name: update swagger
         run: |
           make public-api-generate-swagger
@@ -114,6 +118,10 @@ jobs:
           fetch-depth: 0
       - name: replace version
         run: sed -i "s/VERSION_PLACEHOLDER/${{ needs.semver.outputs.version }}/g" internal-api/server/server.go
+      - name: Setup Go 1.21.x
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.x'
       - name: update swagger
         run: |
           make public-api-generate-swagger
