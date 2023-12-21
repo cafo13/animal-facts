@@ -1,13 +1,22 @@
 CGO_ENABLED=0
 GOOS=linux
 
-install-swag:
-	go install github.com/swaggo/swag/cmd/swag@latest
+ifeq (,$(shell go env GOBIN))
+GOBIN=$(shell go env GOTPATH)/bin
+else
+GOBIN=$(shell go env GOBIN)
+endif
+
+SWAG?=$(GOBIN)/swag
+
+.PHONY: $(SWAG)
+$(SWAG): $(GOBIN)
+	test -s $(GOBIN)/swag || go install github.com/swaggo/swag/cmd/swag@latest
 
 test:
 	go test ./... --tags integration
 
-internal-api-generate-swagger:
+internal-api-generate-swagger: $(SWAG)
 	swag init --generalInfo server.go --dir internal-api/server/,internal-api/api/,internal-api/handler/ --output internal-api/docs/
 
 internal-api-run:
@@ -16,7 +25,7 @@ internal-api-run:
 internal-api-build:
 	go build -ldflags "-s -w" -o bin/animal-facts-internal-api cmd/internal-api/main.go
 
-public-api-generate-swagger:
+public-api-generate-swagger: $(SWAG)
 	swag init --generalInfo server.go --dir public-api/server/,public-api/api/,public-api/handler/ --output public-api/docs/
 
 public-api-run:
