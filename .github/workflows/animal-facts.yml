@@ -17,29 +17,16 @@ on:
 
 jobs:
   semver:
-    name: Generate semantic version
+    name: Set semantic version from repo
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.semver.outputs.version }}
+      version: ${{ steps.semver.outputs.VERSION }}
     steps:
       - name: Check out Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - id: semver
-        name: Git Semantic Version
-        uses: PaulHatch/semantic-version@v5.3.0
-        with:
-          tag_prefix: "v"
-          major_pattern: "(MAJOR)"
-          major_regexp_flags: ""
-          minor_pattern: "(MINOR)"
-          minor_regexp_flags: ""
-          version_format: "${major}.${minor}.${patch}"
-          change_path: "cmd internal-api public-api pkg Dockerfile_public_api Dockerfile_internal_api"
-          bump_each_commit: true
-          search_commit_body: true
-          user_format_type: "json"
+        name: install dependencies
+        run: echo "VERSION=$(cat version.txt)" >> "$GITHUB_OUTPUT"
 
   tests:
     name: Tests
@@ -73,29 +60,23 @@ jobs:
     steps:
       - name: Check out Code
         uses: actions/checkout@v4
-      - name: replace version
-        run: sed -i "s/VERSION_PLACEHOLDER/${{ needs.semver.outputs.version }}/g" public-api/server/server.go
       - name: Setup Go 1.21.x
         uses: actions/setup-go@v4
         with:
           go-version: '1.21.x'
-      - name: update swagger
-        run: |
-          make public-api-generate-swagger
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - name: Tag Docker image and push to Google Artifact Registry
+      - name: Tag Docker image and push to GitHub Artifact Registry
         uses: docker/build-push-action@v5
         with:
           file: Dockerfile_public_api
           push: true
-          no-cache: true
           tags: |
-            ghcr.io/cafo13/animal-facts/public-api:${{ needs.semver.outputs.version }}
+            ghcr.io/cafo13/animal-facts/public-api:${{ needs.semver.outputs.VERSION }}
             ghcr.io/cafo13/animal-facts/public-api:latest
 
 
@@ -113,28 +94,23 @@ jobs:
     steps:
       - name: Check out Code
         uses: actions/checkout@v4
-      - name: replace version
-        run: sed -i "s/VERSION_PLACEHOLDER/${{ needs.semver.outputs.version }}/g" internal-api/server/server.go
       - name: Setup Go 1.21.x
         uses: actions/setup-go@v4
         with:
           go-version: '1.21.x'
-      - name: update swagger
-        run: |
-          make public-api-generate-swagger
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
-      - name: Tag Docker image and push to Google Artifact Registry
+      - name: Tag Docker image and push to GitHub Artifact Registry
         uses: docker/build-push-action@v5
         with:
           file: Dockerfile_internal_api
           push: true
           tags: |
-            ghcr.io/cafo13/animal-facts/internal-api:${{ needs.semver.outputs.version }}
+            ghcr.io/cafo13/animal-facts/internal-api:${{ needs.semver.outputs.VERSION }}
             ghcr.io/cafo13/animal-facts/internal-api:latest
 
   tag_and_release:
@@ -154,11 +130,15 @@ jobs:
         id: create_tag
         uses: rickstaa/action-create-tag@v1
         with:
-          tag: ${{ needs.semver.outputs.version }}
+          tag: ${{ needs.semver.outputs.VERSION }}
+          force_push_tag: true
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.semver.outputs.version }}
+          tag: ${{ needs.semver.outputs.VERSION }}
           body: ${{ github.event.head_commit.message }}
+          allowUpdates: true
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true

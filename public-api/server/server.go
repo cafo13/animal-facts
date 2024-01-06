@@ -25,7 +25,7 @@ var (
 // Run
 //
 // @title           Animal Facts Public API
-// @version         VERSION_PLACEHOLDER
+// @version         0.0.1
 // @description     This API provides facts about animals.
 //
 // @license.name  MIT
@@ -38,7 +38,7 @@ var (
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func Run() {
 	logger.SetupLogger()
-	log.Logger().Info("starting public animal facts api VERSION_PLACEHOLDER")
+	log.Logger().Info("starting public animal facts api 0.0.1")
 
 	loadEnv()
 

@@ -33,3 +33,12 @@ public-api-run:
 
 public-api-build:
 	go build -ldflags "-s -w" -o bin/animal-facts-public-api cmd/public-api/main.go
+
+prepare-release-version:
+	sed -i "s/@version         .*\..*\..*/@version         $(VERSION)/g" public-api/server/server.go
+	sed -i 's/"starting public animal facts api .*\..*\..*"/"starting public animal facts api $(VERSION)"/g' public-api/server/server.go
+	sed -i "s/@version         .*\..*\..*/@version         $(VERSION)/g" internal-api/server/server.go
+	sed -i 's/"starting internal animal facts api .*\..*\..*"/"starting internal animal facts api $(VERSION)"/g' internal-api/server/server.go
+	echo $(VERSION) > version.txt
+
+release-version: prepare-release-version public-api-generate-swagger internal-api-generate-swagger

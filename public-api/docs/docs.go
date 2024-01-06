@@ -141,7 +141,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "VERSION_PLACEHOLDER",
+	Version:          "0.0.1",
 	Host:             "https://animal-facts.cafo.dev",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},

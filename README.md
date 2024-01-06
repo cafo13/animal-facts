@@ -52,3 +52,11 @@ make public-api-generate-swagger
 # generate swagger docs for the internal api locally
 make internal-api-generate-swagger
 ```
+
+## Versioning of the APIs
+
+The internal and public api always have the same version. To update the version simply run the following command and commit and push your changes. The release and tag for the repo will be created in the GitHub action run.
+
+```shell
+make release-version VERSION=1.2.12
+```

@@ -25,7 +25,7 @@ info:
     name: MIT
     url: https://github.com/cafo13/animal-facts/blob/main/LICENSE
   title: Animal Facts Internal API
-  version: VERSION_PLACEHOLDER
+  version: 0.0.1
 paths:
   /facts:
     post:
