@@ -36,7 +36,7 @@ jobs:
           minor_pattern: "(MINOR)"
           minor_regexp_flags: ""
           version_format: "${major}.${minor}.${patch}"
-          change_path: "cmd internal-api public-api pkg"
+          change_path: "cmd internal-api public-api pkg Dockerfile_public_api Dockerfile_internal_api"
           bump_each_commit: true
           search_commit_body: true
           user_format_type: "json"

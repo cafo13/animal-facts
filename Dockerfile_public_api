@@ -1,4 +1,4 @@
-FROM golang:1.21
+FROM golang:1.21 AS build-stage
 
 WORKDIR /animal-facts-public
 
@@ -6,4 +6,12 @@ COPY . .
 RUN go mod download && go mod verify
 RUN CGO_ENABLED=0 GOOS=linux go build -o /animal-facts-public/api -ldflags "-s -w" cmd/public-api/main.go
 
-CMD ["/animal-facts-public/api"]
+FROM gcr.io/distroless/base-debian11 AS build-release-stage
+
+WORKDIR /
+
+COPY --from=build-stage /animal-facts-public/api /animal-facts-public/api
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/animal-facts-public/api"]
