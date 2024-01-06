@@ -25,7 +25,7 @@ jobs:
       - name: Check out Code
         uses: actions/checkout@v4
       - id: semver
-        name: install dependencies
+        name: set version output
         run: echo "VERSION=$(cat version.txt)" >> "$GITHUB_OUTPUT"
 
   tests:
