@@ -2,10 +2,11 @@ package repository
 
 import (
 	"context"
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"os"
 	"time"
+
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/neko-neko/echo-logrus/v2/log"
 	"go.mongodb.org/mongo-driver/bson"
@@ -72,7 +73,12 @@ func (m *MongoDBFactsRepository) factsCollection() *mongo.Collection {
 }
 
 func (m *MongoDBFactsRepository) Create(fact *Fact) error {
-	return errors.New("not implemented")
+	_, err := m.factsCollection().InsertOne(context.TODO(), fact)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m *MongoDBFactsRepository) ReadOne(id primitive.ObjectID) (*Fact, error) {

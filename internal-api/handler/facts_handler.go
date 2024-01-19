@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"time"
+
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"time"
 
 	"github.com/cafo13/animal-facts/pkg/repository"
 )
@@ -60,5 +61,5 @@ func (f *FactsHandler) Update(fact *Fact) error {
 }
 
 func (f *FactsHandler) Delete(id primitive.ObjectID) error {
-	return errors.New("not implemented")
+	return f.factsRepository.Delete(id)
 }

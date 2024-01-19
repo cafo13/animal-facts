@@ -1,5 +1,10 @@
 basePath: /api/v1
 definitions:
+  api.CreateFactResult:
+    properties:
+      id:
+        type: string
+    type: object
   api.CreateUpdateFact:
     properties:
       approved:
@@ -41,9 +46,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: fact created
+          description: Created
           schema:
-            type: string
+            $ref: '#/definitions/api.CreateFactResult'
         "400":
           description: Bad Request
           schema:

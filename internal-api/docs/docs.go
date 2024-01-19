@@ -39,9 +39,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "fact created",
+                        "description": "Created",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.CreateFactResult"
                         }
                     },
                     "400": {
@@ -122,6 +122,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.CreateFactResult": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "api.CreateUpdateFact": {
             "type": "object",
             "properties": {

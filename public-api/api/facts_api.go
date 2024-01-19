@@ -2,12 +2,13 @@ package api
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"github.com/labstack/echo/v4"
-	"github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
 	"github.com/cafo13/animal-facts/pkg/router"
 	_ "github.com/cafo13/animal-facts/public-api/docs"

@@ -3,7 +3,6 @@
 package api
 
 import (
-	"github.com/pkg/errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -14,6 +13,7 @@ import (
 	"github.com/cafo13/animal-facts/pkg/repository"
 	"github.com/cafo13/animal-facts/public-api/handler"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 )
 
 func getFactsApi() (*FactsApi, error) {
