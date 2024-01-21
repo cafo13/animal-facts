@@ -92,8 +92,11 @@ func Test_RunApiIntegrationTests_create_update_delete(t *testing.T) {
 			return
 		}
 		updateReq := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/facts/%s", createRespBody.Id), bytes.NewBuffer(updateJsonBody))
+		updateReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		updateRec := httptest.NewRecorder()
 		updateCtx := e.NewContext(updateReq, updateRec)
+		updateCtx.SetParamNames("id")
+		updateCtx.SetParamValues(createRespBody.Id)
 
 		err = factsApi.updateFact(updateCtx)
 		if err != nil {
@@ -109,6 +112,8 @@ func Test_RunApiIntegrationTests_create_update_delete(t *testing.T) {
 		deleteReq := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/facts/%s", createRespBody.Id), nil)
 		deleteRec := httptest.NewRecorder()
 		deleteCtx := e.NewContext(deleteReq, deleteRec)
+		deleteCtx.SetParamNames("id")
+		deleteCtx.SetParamValues(createRespBody.Id)
 
 		err = factsApi.deleteFact(deleteCtx)
 		if err != nil {

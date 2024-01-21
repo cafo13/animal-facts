@@ -57,7 +57,38 @@ func (f *FactsHandler) Create(fact *Fact) error {
 }
 
 func (f *FactsHandler) Update(fact *Fact) error {
-	return errors.New("not implemented")
+	err := f.factsRepository.Update(fact.ID, func(f *repository.Fact) *repository.Fact {
+		if fact.Fact != f.Fact {
+			f.Fact = fact.Fact
+		}
+		if fact.Source != f.Source {
+			f.Source = fact.Source
+		}
+		f.UpdatedAt = time.Now()
+		f.UpdatedBy = "user.name" // TODO set user name
+		return f
+	})
+	if err != nil {
+		return errors.Wrapf(err, "failed to update fact")
+	}
+
+	return nil
+}
+
+func (f *FactsHandler) ApproveFact(factID primitive.ObjectID) error {
+	err := f.factsRepository.Update(factID, func(f *repository.Fact) *repository.Fact {
+		if f.Approved != true {
+			f.Approved = true
+		}
+		f.UpdatedAt = time.Now()
+		f.UpdatedBy = "user.name" // TODO set user name
+		return f
+	})
+	if err != nil {
+		return errors.Wrapf(err, "failed to approve fact")
+	}
+
+	return nil
 }
 
 func (f *FactsHandler) Delete(id primitive.ObjectID) error {

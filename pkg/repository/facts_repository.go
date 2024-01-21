@@ -34,7 +34,7 @@ type FactsRepository interface {
 	ReadOne(id primitive.ObjectID) (*Fact, error)
 	ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error)
 	ReadManyIDs(filterFunc func(fact *Fact) bool) ([]primitive.ObjectID, error)
-	Update(id primitive.ObjectID, updateFunc func(fact *Fact) error) error
+	Update(id primitive.ObjectID, updateFunc func(fact *Fact) *Fact) error
 	Delete(id primitive.ObjectID) error
 	Count() (int, error)
 	Close() error
@@ -120,12 +120,36 @@ func (m *MongoDBFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) (
 	return result, nil
 }
 
-func (m *MongoDBFactsRepository) Update(id primitive.ObjectID, updateFunc func(fact *Fact) error) error {
-	return errors.New("not implemented")
+func (m *MongoDBFactsRepository) Update(id primitive.ObjectID, updateFunc func(fact *Fact) *Fact) error {
+	filter := bson.D{{"_id", id}}
+	var readResult Fact
+	err := m.factsCollection().FindOne(context.TODO(), filter).Decode(&readResult)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return ErrNotFound
+	} else if err != nil {
+		return errors.Wrapf(err, "failed to get fact with ID '%v' before updating", id)
+	}
+
+	updatedFact := updateFunc(&readResult)
+	update := bson.D{{"$set", updatedFact}}
+	_, err = m.factsCollection().UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		return errors.Wrapf(err, "failed to update fact with ID '%v'", id)
+	}
+
+	return nil
 }
 
 func (m *MongoDBFactsRepository) Delete(id primitive.ObjectID) error {
-	return errors.New("not implemented")
+	filter := bson.D{{"_id", id}}
+	_, err := m.factsCollection().DeleteOne(context.TODO(), filter)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return ErrNotFound
+	} else if err != nil {
+		return errors.Wrapf(err, "failed to delete fact with ID '%v'", id)
+	}
+
+	return nil
 }
 
 func (m *MongoDBFactsRepository) Count() (int, error) {
@@ -211,7 +235,7 @@ func (m *MockFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) ([]p
 	return matchingFactIDs, nil
 }
 
-func (m *MockFactsRepository) Update(id primitive.ObjectID, updateFunc func(fact *Fact) error) error {
+func (m *MockFactsRepository) Update(id primitive.ObjectID, updateFunc func(fact *Fact) *Fact) error {
 	if m.errorAllFunctionCalls {
 		return errors.New("error at updating fact")
 	}
