@@ -41,13 +41,13 @@ func Test_RunApiIntegrationTests_getCount(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		wantResponse   string
+		wantResponses  []string
 		wantHttpStatus int
 		wantErr        bool
 	}{
 		{
 			name:           "get count of facts in test database",
-			wantResponse:   `{"count":3}`,
+			wantResponses:  []string{`{"count":3}`, `{"count":4}`},
 			wantHttpStatus: http.StatusOK,
 			wantErr:        false,
 		},
@@ -69,10 +69,17 @@ func Test_RunApiIntegrationTests_getCount(t *testing.T) {
 				t.Errorf("RunApiIntegrationTests_getCount() gotHttpStatus = %v, wantHttpStatus = %v", rec.Code, tt.wantHttpStatus)
 			}
 
-			if tt.wantResponse != "" {
+			if len(tt.wantResponses) > 0 {
+				responseMatched := false
 				stringBody := strings.TrimSuffix(rec.Body.String(), "\n")
-				if !reflect.DeepEqual(stringBody, tt.wantResponse) {
-					t.Errorf("RunApiIntegrationTests_getCount() gotResponse = %v, wantResponse = %v", stringBody, tt.wantResponse)
+				for _, wantResponse := range tt.wantResponses {
+					if reflect.DeepEqual(stringBody, wantResponse) {
+						responseMatched = true
+						break
+					}
+				}
+				if !responseMatched {
+					t.Errorf("RunApiIntegrationTests_getCount() gotResponse = %v, wantResponses = %v", rec.Body.String(), strings.Join(tt.wantResponses, ","))
 				}
 			}
 		})

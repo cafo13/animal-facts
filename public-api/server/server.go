@@ -49,15 +49,15 @@ func Run() {
 
 	svc := service.NewService(factsRouter)
 
-	apiPortStr, ok := os.LookupEnv("API_PORT")
+	apiPortStr, ok := os.LookupEnv("PUBLIC_API_PORT")
 	if !ok {
-		apiPortStr = "8080"
-		log.Logger().Infof("API_PORT environment variable is not set, using default value %s", apiPortStr)
+		apiPortStr = "8081"
+		log.Logger().Infof("PUBLIC_API_PORT environment variable is not set, using default value %s", apiPortStr)
 	}
 
 	apiPort, err := strconv.Atoi(apiPortStr)
 	if err != nil {
-		panic(errors.Wrap(err, "failed to parse API_PORT environment variable, only integer values are allowed (like 80 or 8080"))
+		panic(errors.Wrap(err, "failed to parse PUBLIC_API_PORT environment variable, only integer values are allowed (like 80 or 8081"))
 	}
 
 	ctx, cancel := signal.NotifyContext(context.TODO(), os.Interrupt)

@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"math/rand"
+
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"math/rand"
 
 	"github.com/cafo13/animal-facts/pkg/repository"
 )

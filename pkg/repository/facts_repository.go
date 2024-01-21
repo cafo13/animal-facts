@@ -32,7 +32,6 @@ type Fact struct {
 type FactsRepository interface {
 	Create(fact *Fact) error
 	ReadOne(id primitive.ObjectID) (*Fact, error)
-	ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error)
 	ReadManyIDs(filterFunc func(fact *Fact) bool) ([]primitive.ObjectID, error)
 	Update(id primitive.ObjectID, updateFunc func(fact *Fact) *Fact) error
 	Delete(id primitive.ObjectID) error
@@ -92,10 +91,6 @@ func (m *MongoDBFactsRepository) ReadOne(id primitive.ObjectID) (*Fact, error) {
 	}
 
 	return &result, nil
-}
-
-func (m *MongoDBFactsRepository) ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error) {
-	return nil, errors.New("not implemented")
 }
 
 func (m *MongoDBFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) ([]primitive.ObjectID, error) {
@@ -203,21 +198,6 @@ func (m *MockFactsRepository) ReadOne(id primitive.ObjectID) (*Fact, error) {
 	}
 
 	return nil, errors.New("fact not found")
-}
-
-func (m *MockFactsRepository) ReadMany(filterFunc func(fact *Fact) bool) ([]*Fact, error) {
-	if m.errorAllFunctionCalls {
-		return nil, errors.New("error at getting facts")
-	}
-
-	var matchingFacts []*Fact
-	for _, fact := range m.facts {
-		if filterFunc(fact) {
-			matchingFacts = append(matchingFacts, fact)
-		}
-	}
-
-	return matchingFacts, nil
 }
 
 func (m *MockFactsRepository) ReadManyIDs(filterFunc func(fact *Fact) bool) ([]primitive.ObjectID, error) {
