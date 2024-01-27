@@ -75,9 +75,9 @@ func (f *FactsHandler) Update(fact *Fact) error {
 	return nil
 }
 
-func (f *FactsHandler) ApproveFact(factID primitive.ObjectID) error {
+func (f *FactsHandler) Approve(factID primitive.ObjectID) error {
 	err := f.factsRepository.Update(factID, func(f *repository.Fact) *repository.Fact {
-		if f.Approved != true {
+		if !f.Approved {
 			f.Approved = true
 		}
 		f.UpdatedAt = time.Now()
@@ -86,6 +86,22 @@ func (f *FactsHandler) ApproveFact(factID primitive.ObjectID) error {
 	})
 	if err != nil {
 		return errors.Wrapf(err, "failed to approve fact")
+	}
+
+	return nil
+}
+
+func (f *FactsHandler) Unapprove(factID primitive.ObjectID) error {
+	err := f.factsRepository.Update(factID, func(f *repository.Fact) *repository.Fact {
+		if f.Approved {
+			f.Approved = false
+		}
+		f.UpdatedAt = time.Now()
+		f.UpdatedBy = "user.name" // TODO set user name
+		return f
+	})
+	if err != nil {
+		return errors.Wrapf(err, "failed to unapprove fact")
 	}
 
 	return nil

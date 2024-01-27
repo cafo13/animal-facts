@@ -3,16 +3,18 @@ package router
 import (
 	"context"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/neko-neko/echo-logrus/v2"
-	"github.com/neko-neko/echo-logrus/v2/log"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	middleware "github.com/neko-neko/echo-logrus/v2"
+	"github.com/neko-neko/echo-logrus/v2/log"
 )
 
 type Route struct {
 	Method      string
 	Path        string
 	HandlerFunc func(c echo.Context) error
+	Middlewares []echo.MiddlewareFunc
 }
 
 type Router struct {
@@ -29,16 +31,16 @@ func NewRouter() *Router {
 func (r Router) RegisterRoute(route Route) error {
 	switch route.Method {
 	case http.MethodGet:
-		r.echoRouter.GET(route.Path, route.HandlerFunc)
+		r.echoRouter.GET(route.Path, route.HandlerFunc, route.Middlewares...)
 		return nil
 	case http.MethodPost:
-		r.echoRouter.POST(route.Path, route.HandlerFunc)
+		r.echoRouter.POST(route.Path, route.HandlerFunc, route.Middlewares...)
 		return nil
 	case http.MethodPut:
-		r.echoRouter.PUT(route.Path, route.HandlerFunc)
+		r.echoRouter.PUT(route.Path, route.HandlerFunc, route.Middlewares...)
 		return nil
 	case http.MethodDelete:
-		r.echoRouter.DELETE(route.Path, route.HandlerFunc)
+		r.echoRouter.DELETE(route.Path, route.HandlerFunc, route.Middlewares...)
 		return nil
 	}
 

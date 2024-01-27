@@ -7,8 +7,6 @@ definitions:
     type: object
   api.CreateUpdateFact:
     properties:
-      approved:
-        type: boolean
       fact:
         type: string
       source:
@@ -98,4 +96,36 @@ paths:
           schema:
             $ref: '#/definitions/api.ErrorResult'
       summary: update fact
+  /facts/:id/approve:
+    post:
+      description: approve an existing fact, so that it gets available in the public
+        API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: fact approved
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResult'
+      summary: approve fact
+  /facts/:id/unapprove:
+    post:
+      description: unapprove an existing fact, so that it is no longer available in
+        the public API
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: fact unapproved
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResult'
+      summary: unapprove fact
 swagger: "2.0"

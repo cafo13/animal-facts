@@ -119,6 +119,52 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/facts/:id/approve": {
+            "post": {
+                "description": "approve an existing fact, so that it gets available in the public API",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "approve fact",
+                "responses": {
+                    "200": {
+                        "description": "fact approved",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/facts/:id/unapprove": {
+            "post": {
+                "description": "unapprove an existing fact, so that it is no longer available in the public API",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "unapprove fact",
+                "responses": {
+                    "200": {
+                        "description": "fact unapproved",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -133,9 +179,6 @@ const docTemplate = `{
         "api.CreateUpdateFact": {
             "type": "object",
             "properties": {
-                "approved": {
-                    "type": "boolean"
-                },
                 "fact": {
                     "type": "string"
                 },

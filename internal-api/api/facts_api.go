@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/cafo13/animal-facts/internal-api/docs"
 	"github.com/cafo13/animal-facts/internal-api/handler"
+	"github.com/cafo13/animal-facts/pkg/middleware"
 	"github.com/cafo13/animal-facts/pkg/router"
 )
 
@@ -23,9 +24,8 @@ type CreateFactResult struct {
 }
 
 type CreateUpdateFact struct {
-	Fact     string `json:"fact"`
-	Source   string `json:"source"`
-	Approved bool   `json:"approved"`
+	Fact   string `json:"fact"`
+	Source string `json:"source"`
 }
 
 type ErrorResult struct {
@@ -61,16 +61,46 @@ func (f *FactsApi) SetupRoutes() {
 			Method:      "POST",
 			Path:        fmt.Sprintf("/%s/facts", basePathV1),
 			HandlerFunc: f.createFact,
+			Middlewares: []echo.MiddlewareFunc{
+				middleware.EnsureValidToken(),
+				middleware.VerifyScope("create:fact"),
+			},
 		},
 		{
 			Method:      "PUT",
 			Path:        fmt.Sprintf("%s/facts/:id", basePathV1),
 			HandlerFunc: f.updateFact,
+			Middlewares: []echo.MiddlewareFunc{
+				middleware.EnsureValidToken(),
+				middleware.VerifyScope("update:fact"),
+			},
 		},
 		{
 			Method:      "DELETE",
 			Path:        fmt.Sprintf("%s/facts/:id", basePathV1),
 			HandlerFunc: f.deleteFact,
+			Middlewares: []echo.MiddlewareFunc{
+				middleware.EnsureValidToken(),
+				middleware.VerifyScope("delete:fact"),
+			},
+		},
+		{
+			Method:      "POST",
+			Path:        fmt.Sprintf("/%s/facts/:id/approve", basePathV1),
+			HandlerFunc: f.approveFact,
+			Middlewares: []echo.MiddlewareFunc{
+				middleware.EnsureValidToken(),
+				middleware.VerifyScope("approve:fact"),
+			},
+		},
+		{
+			Method:      "POST",
+			Path:        fmt.Sprintf("/%s/facts/:id/unapprove", basePathV1),
+			HandlerFunc: f.unapproveFact,
+			Middlewares: []echo.MiddlewareFunc{
+				middleware.EnsureValidToken(),
+				middleware.VerifyScope("unapprove:fact"),
+			},
 		},
 	}
 }
@@ -105,7 +135,7 @@ func (f *FactsApi) createFact(c echo.Context) error {
 		ID:       id,
 		Fact:     fact.Fact,
 		Source:   fact.Source,
-		Approved: fact.Approved,
+		Approved: false,
 	})
 	if err != nil {
 		// TODO only log error and return generic message as internal server error should not be displayed to user
@@ -139,10 +169,9 @@ func (f *FactsApi) updateFact(c echo.Context) error {
 	}
 
 	err = f.factsHandler.Update(&handler.Fact{
-		ID:       objID,
-		Fact:     fact.Fact,
-		Source:   fact.Source,
-		Approved: fact.Approved,
+		ID:     objID,
+		Fact:   fact.Fact,
+		Source: fact.Source,
 	})
 	if err != nil {
 		// TODO only log error and return generic message as internal server error should not be displayed to user
@@ -174,4 +203,52 @@ func (f *FactsApi) deleteFact(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "fact deleted")
+}
+
+// approveFact
+//
+//	@Summary      approve fact
+//	@Description  approve an existing fact, so that it gets available in the public API
+//	@Produce      json
+//	@Success      200  {string}  "fact approved"
+//	@Failure      500  {object}  ErrorResult
+//	@Router       /facts/:id/approve [post]
+func (f *FactsApi) approveFact(c echo.Context) error {
+	id := c.Param("id")
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResult{Error: "id from request path is not a valid object id in hex string format"})
+	}
+
+	err = f.factsHandler.Approve(objID)
+	if err != nil {
+		// TODO only log error and return generic message as internal server error should not be displayed to user
+		return c.JSON(http.StatusInternalServerError, ErrorResult{Error: err.Error()})
+	}
+
+	return c.String(http.StatusOK, "fact approved")
+}
+
+// unapproveFact
+//
+//	@Summary      unapprove fact
+//	@Description  unapprove an existing fact, so that it is no longer available in the public API
+//	@Produce      json
+//	@Success      200  {string}  "fact unapproved"
+//	@Failure      500  {object}  ErrorResult
+//	@Router       /facts/:id/unapprove [post]
+func (f *FactsApi) unapproveFact(c echo.Context) error {
+	id := c.Param("id")
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorResult{Error: "id from request path is not a valid object id in hex string format"})
+	}
+
+	err = f.factsHandler.Unapprove(objID)
+	if err != nil {
+		// TODO only log error and return generic message as internal server error should not be displayed to user
+		return c.JSON(http.StatusInternalServerError, ErrorResult{Error: err.Error()})
+	}
+
+	return c.String(http.StatusOK, "fact unapproved")
 }

@@ -44,9 +44,8 @@ func Test_RunApiIntegrationTests_create_update_delete(t *testing.T) {
 	t.Run("create, update and delete a fact", func(t *testing.T) {
 		e := echo.New()
 		createReqBody := CreateUpdateFact{
-			Fact:     "Some new animal fact.",
-			Source:   "some-source.com/animalfact/23",
-			Approved: true,
+			Fact:   "Some new animal fact.",
+			Source: "some-source.com/animalfact/23",
 		}
 		createJsonBody, err := json.Marshal(createReqBody)
 		if err != nil {
@@ -82,9 +81,8 @@ func Test_RunApiIntegrationTests_create_update_delete(t *testing.T) {
 		}
 
 		updateReqBody := CreateUpdateFact{
-			Fact:     "Some updated animal fact.",
-			Source:   "some-source.com/animalfact/23",
-			Approved: true,
+			Fact:   "Some updated animal fact.",
+			Source: "some-source.com/animalfact/23",
 		}
 		updateJsonBody, err := json.Marshal(updateReqBody)
 		if err != nil {
@@ -108,6 +106,8 @@ func Test_RunApiIntegrationTests_create_update_delete(t *testing.T) {
 			t.Errorf("Test_RunApiIntegrationTests_create_update_delete() expected status code 200 for update response, got %d", updateRec.Code)
 			return
 		}
+
+		// TODO: approve and unapprove fact
 
 		deleteReq := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/facts/%s", createRespBody.Id), nil)
 		deleteRec := httptest.NewRecorder()
