@@ -107,7 +107,41 @@ func Test_RunApiIntegrationTests_create_update_delete(t *testing.T) {
 			return
 		}
 
-		// TODO: approve and unapprove fact
+		approveFactReq := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/facts/%s/approve", createRespBody.Id), nil)
+		approveFactReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		approveFactRec := httptest.NewRecorder()
+		approveFactCtx := e.NewContext(approveFactReq, approveFactRec)
+		approveFactCtx.SetParamNames("id")
+		approveFactCtx.SetParamValues(createRespBody.Id)
+
+		err = factsApi.approveFact(approveFactCtx)
+		if err != nil {
+			t.Errorf("Test_RunApiIntegrationTests_create_update_delete() unepected error at approving fact = %v", err)
+			return
+		}
+
+		if approveFactRec.Code != http.StatusOK {
+			t.Errorf("Test_RunApiIntegrationTests_create_update_delete() expected status code 200 for approving fact response, got %d", updateRec.Code)
+			return
+		}
+
+		unapproveFactReq := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/facts/%s/unapprove", createRespBody.Id), nil)
+		unapproveFactReq.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		unapproveFactRec := httptest.NewRecorder()
+		unapproveFactCtx := e.NewContext(unapproveFactReq, unapproveFactRec)
+		unapproveFactCtx.SetParamNames("id")
+		unapproveFactCtx.SetParamValues(createRespBody.Id)
+
+		err = factsApi.unapproveFact(unapproveFactCtx)
+		if err != nil {
+			t.Errorf("Test_RunApiIntegrationTests_create_update_delete() unepected error at unapproving fact = %v", err)
+			return
+		}
+
+		if unapproveFactRec.Code != http.StatusOK {
+			t.Errorf("Test_RunApiIntegrationTests_create_update_delete() expected status code 200 for unapproving fact response, got %d", updateRec.Code)
+			return
+		}
 
 		deleteReq := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/facts/%s", createRespBody.Id), nil)
 		deleteRec := httptest.NewRecorder()
