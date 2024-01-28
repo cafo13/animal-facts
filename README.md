@@ -10,12 +10,12 @@ Detailed information about the available endpoints can be seen on the [swagger p
 
 ```shell
 # get random fact
-curl https://animal-facts.cafo.dev/api/v1/api/v1/facts
+curl https://animal-facts.cafo.dev/api/v1/facts
 # example response
 {"id":"6578bf140e487ecc049c7594","fact":"The Blue Whale is the largest animal that has ever lived.","source":"https://factanimal.com/blue-whale/"}
 
 # get fact by id
-curl https://animal-facts.cafo.dev/api/v1/api/v1/facts/6578bf140e487ecc049c7594
+curl https://animal-facts.cafo.dev/api/v1/facts/6578bf140e487ecc049c7594
 # example response
 {"id":"6578bf140e487ecc049c7594","fact":"The Blue Whale is the largest animal that has ever lived.","source":"https://factanimal.com/blue-whale/"}
 ```
