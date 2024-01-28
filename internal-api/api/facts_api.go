@@ -49,12 +49,12 @@ func (f *FactsApi) SetupRoutes() {
 	f.factsApiRoutes = []router.Route{
 		{
 			Method:      "GET",
-			Path:        "/swagger/*",
+			Path:        "/swagger-internal/*",
 			HandlerFunc: echoSwagger.WrapHandler,
 		},
 		{
 			Method:      "GET",
-			Path:        "/health",
+			Path:        "/health-internal",
 			HandlerFunc: f.getHealth,
 		},
 		{
