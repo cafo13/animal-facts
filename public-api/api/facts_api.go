@@ -40,7 +40,7 @@ func (f *FactsApi) SetupRoutes() {
 	f.factsApiRoutes = []router.Route{
 		{
 			Method:      "GET",
-			Path:        "/swagger-public/*",
+			Path:        "/swagger/*",
 			HandlerFunc: echoSwagger.WrapHandler,
 		},
 		{

@@ -49,13 +49,22 @@ func (f *FactsApi) SetupRoutes() {
 	f.factsApiRoutes = []router.Route{
 		{
 			Method:      "GET",
-			Path:        "/swagger-internal/*",
+			Path:        "/swagger/*",
 			HandlerFunc: echoSwagger.WrapHandler,
 		},
 		{
 			Method:      "GET",
 			Path:        "/health-internal",
 			HandlerFunc: f.getHealth,
+		},
+		{
+			Method:      "GET",
+			Path:        fmt.Sprintf("/%s/facts/all", basePathV1),
+			HandlerFunc: f.getAllFacts,
+			Middlewares: []echo.MiddlewareFunc{
+				middleware.EnsureValidToken(),
+				middleware.VerifyScope("get:fact"),
+			},
 		},
 		{
 			Method:      "POST",
@@ -251,4 +260,22 @@ func (f *FactsApi) unapproveFact(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "fact unapproved")
+}
+
+// getAllFacts
+//
+//	@Summary      gets all facts
+//	@Description  gets all facts (approved and unapproved) from the database
+//	@Produce      json
+//	@Success      200  {array}   []handler.Fact
+//	@Failure      500  {object}  ErrorResult
+//	@Router       /facts/all     [get]
+func (f *FactsApi) getAllFacts(c echo.Context) error {
+	facts, err := f.factsHandler.GetAll()
+	if err != nil {
+		// TODO only log error and return generic message as internal server error should not be displayed to user
+		return c.JSON(http.StatusInternalServerError, ErrorResult{Error: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, &facts)
 }

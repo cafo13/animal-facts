@@ -110,3 +110,17 @@ func (f *FactsHandler) Unapprove(factID primitive.ObjectID) error {
 func (f *FactsHandler) Delete(id primitive.ObjectID) error {
 	return f.factsRepository.Delete(id)
 }
+
+func (f *FactsHandler) GetAll() ([]*Fact, error) {
+	repositoryFacts, err := f.factsRepository.ReadAll()
+	if err != nil {
+		return nil, errors.Wrapf(err, "could not get all facts")
+	}
+
+	var facts []*Fact
+	for _, repositoryFact := range repositoryFacts {
+		facts = append(facts, f.mapFactToHandler(repositoryFact))
+	}
+
+	return facts, nil
+}

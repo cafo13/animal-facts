@@ -165,6 +165,35 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/facts/all": {
+            "get": {
+                "description": "gets all facts (approved and unapproved) from the database",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "gets all facts",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/handler.Fact"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResult"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -191,6 +220,23 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "handler.Fact": {
+            "type": "object",
+            "properties": {
+                "approved": {
+                    "type": "boolean"
+                },
+                "fact": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "source": {
                     "type": "string"
                 }
             }

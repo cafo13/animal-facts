@@ -33,6 +33,7 @@ type FactsRepository interface {
 	Create(fact *Fact) error
 	ReadOne(id primitive.ObjectID) (*Fact, error)
 	ReadManyIDs(filterFunc func(fact *Fact) bool) ([]primitive.ObjectID, error)
+	ReadAll() ([]*Fact, error)
 	Update(id primitive.ObjectID, updateFunc func(fact *Fact) *Fact) error
 	Delete(id primitive.ObjectID) error
 	Count() (int, error)
@@ -162,6 +163,25 @@ func (m *MongoDBFactsRepository) Count() (int, error) {
 	return len(facts), nil
 }
 
+func (m *MongoDBFactsRepository) ReadAll() ([]*Fact, error) {
+	var facts []Fact
+	cursor, err := m.factsCollection().Find(context.TODO(), bson.D{{}})
+	if err != nil {
+		return nil, err
+	}
+
+	if err = cursor.All(context.TODO(), &facts); err != nil {
+		return nil, err
+	}
+
+	var result []*Fact
+	for _, fact := range facts {
+		result = append(result, &fact)
+	}
+
+	return result, nil
+}
+
 func (m *MongoDBFactsRepository) Close() error {
 	if err := m.mongoDbClient.Disconnect(context.TODO()); err != nil {
 		log.Logger().WithError(err).Fatal("failed to disconnect from mongo db")
@@ -237,6 +257,19 @@ func (m *MockFactsRepository) Count() (int, error) {
 	}
 
 	return len(m.facts), nil
+}
+
+func (m *MockFactsRepository) ReadAll() ([]*Fact, error) {
+	if m.errorAllFunctionCalls {
+		return nil, errors.New("error at getting all facts")
+	}
+
+	var facts []*Fact
+	for _, fact := range m.facts {
+		facts = append(facts, fact)
+	}
+
+	return facts, nil
 }
 
 func (m *MockFactsRepository) Close() error {
