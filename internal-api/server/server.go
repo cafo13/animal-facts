@@ -31,7 +31,7 @@ var (
 // @license.name  MIT
 // @license.url   https://github.com/cafo13/animal-facts/blob/main/LICENSE
 //
-// @host      https://animal-facts-manager.cafo.dev
+// @host      https://animal-facts-internal.cafo.dev
 // @BasePath  /api/v1
 //
 // @externalDocs.description  OpenAPI

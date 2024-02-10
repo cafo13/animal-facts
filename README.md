@@ -22,7 +22,7 @@ curl https://animal-facts.cafo.dev/api/v1/facts/6578bf140e487ecc049c7594
 
 ## Usage of internal api
 
-The internal api is built to manage the facts database. A management UI using the API is built with appsmith [here](https://github.com/cafo13/animal-facts-manager). To get access to be able to manage the public's api database of https://animal-facts.cafo.dev/, feel free to create an issue at this repository.
+The internal api is built to manage the facts database. A management UI using the API is built [here](https://github.com/cafo13/animal-facts-manager). To get access to be able to manage the public's api database of https://animal-facts.cafo.dev/, feel free to create an issue at this or the animal-facts-manager repository.
 
 ## Development with own database
 

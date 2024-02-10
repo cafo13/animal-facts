@@ -10,7 +10,7 @@
         },
         "version": "0.0.2"
     },
-    "host": "https://animal-facts-manager.cafo.dev",
+    "host": "https://animal-facts-internal.cafo.dev",
     "basePath": "/api/v1",
     "paths": {
         "/facts": {
