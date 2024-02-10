@@ -28,7 +28,7 @@ The internal api is built to manage the facts database. A management UI using th
 
 Prerequisites:
 - [go](https://go.dev/doc/install):
-  - version 1.21
+  - version 1.22
 - [mongo database](https://www.mongodb.com/):
   - database named "animal-facts" with collection named "facts" (database name can be overwritten with environment variable MONGODB_DATABASE_NAME)
 - copy the [.env.dist](.env.dist) file to [.env](.env) and fill the variables for the mongodb connection to your database
