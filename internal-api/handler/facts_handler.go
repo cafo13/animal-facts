@@ -111,16 +111,11 @@ func (f *FactsHandler) Delete(id primitive.ObjectID) error {
 	return f.factsRepository.Delete(id)
 }
 
-func (f *FactsHandler) GetAll() ([]*Fact, error) {
+func (f *FactsHandler) GetAll() ([]*repository.Fact, error) {
 	repositoryFacts, err := f.factsRepository.ReadAll()
 	if err != nil {
 		return nil, errors.Wrapf(err, "could not get all facts")
 	}
 
-	var facts []*Fact
-	for _, repositoryFact := range repositoryFacts {
-		facts = append(facts, f.mapFactToHandler(repositoryFact))
-	}
-
-	return facts, nil
+	return repositoryFacts, nil
 }

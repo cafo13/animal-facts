@@ -17,15 +17,23 @@ definitions:
       error:
         type: string
     type: object
-  handler.Fact:
+  repository.Fact:
     properties:
       approved:
         type: boolean
+      createdAt:
+        type: string
+      createdBy:
+        type: string
       fact:
         type: string
       id:
         type: string
       source:
+        type: string
+      updatedAt:
+        type: string
+      updatedBy:
         type: string
     type: object
 externalDocs:
@@ -39,7 +47,7 @@ info:
     name: MIT
     url: https://github.com/cafo13/animal-facts/blob/main/LICENSE
   title: Animal Facts Internal API
-  version: 0.0.2
+  version: 0.0.3
 paths:
   /facts:
     post:
@@ -150,7 +158,7 @@ paths:
           schema:
             items:
               items:
-                $ref: '#/definitions/handler.Fact'
+                $ref: '#/definitions/repository.Fact'
               type: array
             type: array
         "500":

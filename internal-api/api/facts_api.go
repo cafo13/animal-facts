@@ -267,7 +267,7 @@ func (f *FactsApi) unapproveFact(c echo.Context) error {
 //	@Summary      gets all facts
 //	@Description  gets all facts (approved and unapproved) from the database
 //	@Produce      json
-//	@Success      200  {array}   []handler.Fact
+//	@Success      200  {array}   []repository.Fact
 //	@Failure      500  {object}  ErrorResult
 //	@Router       /facts/all     [get]
 func (f *FactsApi) getAllFacts(c echo.Context) error {

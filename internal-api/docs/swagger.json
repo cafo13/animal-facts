@@ -8,7 +8,7 @@
             "name": "MIT",
             "url": "https://github.com/cafo13/animal-facts/blob/main/LICENSE"
         },
-        "version": "0.0.2"
+        "version": "0.0.3"
     },
     "host": "https://animal-facts-internal.cafo.dev",
     "basePath": "/api/v1",
@@ -175,7 +175,7 @@
                             "items": {
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/definitions/handler.Fact"
+                                    "$ref": "#/definitions/repository.Fact"
                                 }
                             }
                         }
@@ -218,11 +218,17 @@
                 }
             }
         },
-        "handler.Fact": {
+        "repository.Fact": {
             "type": "object",
             "properties": {
                 "approved": {
                     "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
                 },
                 "fact": {
                     "type": "string"
@@ -231,6 +237,12 @@
                     "type": "string"
                 },
                 "source": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updatedBy": {
                     "type": "string"
                 }
             }

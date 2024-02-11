@@ -17,7 +17,7 @@ test:
 	go test ./... --tags integration
 
 internal-api-generate-swagger: $(SWAG)
-	swag init --generalInfo server.go --dir internal-api/server/,internal-api/api/,internal-api/handler/ --output internal-api/docs/
+	swag init --generalInfo server.go --dir internal-api/server/,internal-api/api/,internal-api/handler/,pkg/repository/ --output internal-api/docs/
 
 internal-api-run:
 	go run cmd/internal-api/main.go

@@ -181,7 +181,7 @@ const docTemplate = `{
                             "items": {
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/definitions/handler.Fact"
+                                    "$ref": "#/definitions/repository.Fact"
                                 }
                             }
                         }
@@ -224,11 +224,17 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.Fact": {
+        "repository.Fact": {
             "type": "object",
             "properties": {
                 "approved": {
                     "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
                 },
                 "fact": {
                     "type": "string"
@@ -237,6 +243,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "source": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "updatedBy": {
                     "type": "string"
                 }
             }
@@ -250,7 +262,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "0.0.2",
+	Version:          "0.0.3",
 	Host:             "https://animal-facts-internal.cafo.dev",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
