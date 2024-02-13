@@ -6,7 +6,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	middleware "github.com/neko-neko/echo-logrus/v2"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	logrusMiddleware "github.com/neko-neko/echo-logrus/v2"
 	"github.com/neko-neko/echo-logrus/v2/log"
 )
 
@@ -24,7 +25,9 @@ type Router struct {
 func NewRouter() *Router {
 	echoRouter := echo.New()
 	echoRouter.Logger = log.Logger()
-	echoRouter.Use(middleware.Logger())
+	echoRouter.Use(logrusMiddleware.Logger())
+	echoRouter.Use(echoMiddleware.CORS())
+	echoRouter.Use(echoMiddleware.Recover())
 	return &Router{echoRouter}
 }
 

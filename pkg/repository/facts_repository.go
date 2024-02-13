@@ -19,14 +19,14 @@ var (
 )
 
 type Fact struct {
-	ID        primitive.ObjectID `bson:"_id"`
-	Fact      string             `bson:"fact"`
-	Source    string             `bson:"source"`
-	Approved  bool               `bson:"approved"`
-	CreatedAt time.Time          `bson:"created_at"`
-	CreatedBy string             `bson:"created_by"`
-	UpdatedAt time.Time          `bson:"updated_at"`
-	UpdatedBy string             `bson:"updated_by"`
+	ID        primitive.ObjectID `bson:"_id" json:"id"`
+	Fact      string             `bson:"fact" json:"fact"`
+	Source    string             `bson:"source" json:"source"`
+	Approved  bool               `bson:"approved" json:"approved"`
+	CreatedAt time.Time          `bson:"created_at" json:"createdAt"`
+	CreatedBy string             `bson:"created_by" json:"createdBy"`
+	UpdatedAt time.Time          `bson:"updated_at" json:"updatedAt"`
+	UpdatedBy string             `bson:"updated_by" json:"updatedBy"`
 }
 
 type FactsRepository interface {

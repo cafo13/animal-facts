@@ -62,7 +62,6 @@ func (f *FactsApi) SetupRoutes() {
 			Path:        fmt.Sprintf("/%s/facts/all", basePathV1),
 			HandlerFunc: f.getAllFacts,
 			Middlewares: []echo.MiddlewareFunc{
-				middleware.EnsureCORSAllowed(),
 				middleware.EnsureValidToken(),
 				middleware.VerifyScope("get:fact"),
 			},
@@ -72,7 +71,6 @@ func (f *FactsApi) SetupRoutes() {
 			Path:        fmt.Sprintf("/%s/facts", basePathV1),
 			HandlerFunc: f.createFact,
 			Middlewares: []echo.MiddlewareFunc{
-				middleware.EnsureCORSAllowed(),
 				middleware.EnsureValidToken(),
 				middleware.VerifyScope("create:fact"),
 			},
@@ -82,7 +80,6 @@ func (f *FactsApi) SetupRoutes() {
 			Path:        fmt.Sprintf("%s/facts/:id", basePathV1),
 			HandlerFunc: f.updateFact,
 			Middlewares: []echo.MiddlewareFunc{
-				middleware.EnsureCORSAllowed(),
 				middleware.EnsureValidToken(),
 				middleware.VerifyScope("update:fact"),
 			},
@@ -92,7 +89,6 @@ func (f *FactsApi) SetupRoutes() {
 			Path:        fmt.Sprintf("%s/facts/:id", basePathV1),
 			HandlerFunc: f.deleteFact,
 			Middlewares: []echo.MiddlewareFunc{
-				middleware.EnsureCORSAllowed(),
 				middleware.EnsureValidToken(),
 				middleware.VerifyScope("delete:fact"),
 			},
@@ -102,7 +98,6 @@ func (f *FactsApi) SetupRoutes() {
 			Path:        fmt.Sprintf("/%s/facts/:id/approve", basePathV1),
 			HandlerFunc: f.approveFact,
 			Middlewares: []echo.MiddlewareFunc{
-				middleware.EnsureCORSAllowed(),
 				middleware.EnsureValidToken(),
 				middleware.VerifyScope("approve:fact"),
 			},
@@ -112,7 +107,6 @@ func (f *FactsApi) SetupRoutes() {
 			Path:        fmt.Sprintf("/%s/facts/:id/unapprove", basePathV1),
 			HandlerFunc: f.unapproveFact,
 			Middlewares: []echo.MiddlewareFunc{
-				middleware.EnsureCORSAllowed(),
 				middleware.EnsureValidToken(),
 				middleware.VerifyScope("unapprove:fact"),
 			},

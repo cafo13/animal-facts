@@ -8,7 +8,7 @@
             "name": "MIT",
             "url": "https://github.com/cafo13/animal-facts/blob/main/LICENSE"
         },
-        "version": "0.0.3"
+        "version": "0.0.4"
     },
     "host": "https://animal-facts-internal.cafo.dev",
     "basePath": "/api/v1",

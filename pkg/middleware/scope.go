@@ -24,5 +24,4 @@ func VerifyScope(scope string) func(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(c)
 		}
 	}
-
 }

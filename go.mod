@@ -4,8 +4,8 @@ go 1.22
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/labstack/echo/v4 v4.11.3
-	github.com/labstack/gommon v0.4.1
+	github.com/labstack/echo/v4 v4.11.4
+	github.com/labstack/gommon v0.4.2
 	github.com/neko-neko/echo-logrus/v2 v2.0.2
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.9.3
@@ -15,7 +15,11 @@ require (
 	golang.org/x/sync v0.6.0
 )
 
-require gopkg.in/go-jose/go-jose.v2 v2.6.2 // indirect
+require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	golang.org/x/time v0.5.0 // indirect
+	gopkg.in/go-jose/go-jose.v2 v2.6.2 // indirect
+)
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
